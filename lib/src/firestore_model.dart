@@ -23,9 +23,7 @@ abstract class FirestoreModel<T extends Object> {
   }
 
   create({String? docId}) async {
-    await _collectionReference.doc(docId)
-        .set(this)
-        .catchError((error) {
+    await _collectionReference.doc(docId).set(this).catchError((error) {
       print("Failed to add user: $error");
     });
   }
