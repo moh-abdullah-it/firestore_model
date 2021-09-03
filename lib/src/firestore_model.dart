@@ -22,8 +22,10 @@ abstract class FirestoreModel<T extends Object> {
             toFirestore: (snapshot, _) => toMap);
   }
 
-  create() async {
-    await _collectionReference.add(this).catchError((error) {
+  create({String? docId}) async {
+    await _collectionReference.doc(docId)
+        .set(this)
+        .catchError((error) {
       print("Failed to add user: $error");
     });
   }
