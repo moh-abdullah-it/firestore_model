@@ -1,15 +1,17 @@
 name: firestore_model
 description: A new Flutter project.
 version: 0.0.1
-homepage:
+homepage: https://github.com/moh-abdullah-it/firestore_model
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.17.0"
+  flutter: ">=2.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  firebase_core: ^1.6.0
+  cloud_firestore: ^2.5.1
 
 dev_dependencies:
   flutter_test:

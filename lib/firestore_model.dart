@@ -1,7 +1,14 @@
 library firestore_model;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/widgets.dart';
+
+export 'src/firestore_model.dart';
+
+class FirebaseApp {
+  // Wait for Firebase to initialize
+  static initializeApp() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+  }
 }

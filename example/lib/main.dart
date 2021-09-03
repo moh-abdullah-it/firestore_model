@@ -1,6 +1,9 @@
+import 'package:example/models/user.dart';
+import 'package:firestore_model/firestore_model.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  await FirebaseApp.initializeApp();
   runApp(MyApp());
 }
 
@@ -46,7 +49,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  User _user = User(firstName: "mohamed 3", lastName: "Abdullah 3");
   int _counter = 0;
+
+  void _addUser() async {
+    await _user.create();
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -104,7 +112,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () => _user
+            .get(
+                queryBuilder: (q) =>
+                    q.where('first_name', isEqualTo: "mohamed"))
+            .then((value) => print("Users ${value.length}")),
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
