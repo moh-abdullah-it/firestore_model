@@ -39,6 +39,17 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
         .then((snapshot) => snapshot.data() as T);
   }
 
+  Future<T> first({Query queryBuilder(Query query)?}) async {
+    Query query = _collectionReference;
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
+    }
+    return await query
+        .limit(1)
+        .get()
+        .then((snapshot) => snapshot.docs.first.data() as T);
+  }
+
   Future<List<T?>> all() async {
     QuerySnapshot snapshot = await _collectionReference.get();
     return snapshot.docs.map<T?>((doc) {
