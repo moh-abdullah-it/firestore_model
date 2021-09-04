@@ -145,4 +145,11 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
       return _model;
     }).toList();
   }
+
+  Future<bool> exists(String docId) async {
+    return await _collectionReference
+        .doc(docId)
+        .get()
+        .then((value) => value.exists);
+  }
 }

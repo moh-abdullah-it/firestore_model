@@ -51,7 +51,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   User _user = User(firstName: "mohamed 3", lastName: "Abdullah 3");
-  int _counter = 0;
   List<User?> users = <User?>[];
 
   @override
@@ -68,6 +67,11 @@ class _MyHomePageState extends State<MyHomePage> {
         users.addAll(values);
       });
     });
+  }
+
+  void checkDoc() async {
+    print(
+        "doc exists ${await FirestoreModel.use<User>().exists("4P1LfnSycMEDaTP5yvEF")}");
   }
 
   void _addUser() async {
