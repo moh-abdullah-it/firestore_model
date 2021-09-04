@@ -71,4 +71,10 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
   }
 
   update() {}
+  delete({String? docId}) async {
+    if (docId != null) {
+      this.docId = docId;
+    }
+    return await _collectionReference.doc(this.docId).delete();
+  }
 }

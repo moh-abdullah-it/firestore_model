@@ -95,6 +95,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     return ListTile(
                       title: Text(users?[index]?.firstName ?? ''),
                       subtitle: Text(users?[index]?.docId ?? ''),
+                      trailing: IconButton(
+                        onPressed: () => users?[index]?.delete(),
+                        icon: Icon(Icons.delete),
+                      ),
                     );
                   });
             }
