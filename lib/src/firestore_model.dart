@@ -8,6 +8,7 @@ final Map<String, DocumentSnapshot<Object?>> pagination = {};
 final Map<String, Object> injectsMap = {};
 
 mixin MixinFirestoreModel<T> {
+  int get perPage => 20;
   String? docId;
   Map<String, dynamic> get toMap;
   ResponseBuilder<T> get responseBuilder;
@@ -18,7 +19,7 @@ mixin MixinFirestoreModel<T> {
 
 abstract class FirestoreModel<T extends MixinFirestoreModel>
     with MixinFirestoreModel<T> {
-  CollectionReference get _collectionReference => initReference();
+  CollectionReference get _collectionReference => _initReference();
 
   static T use<T extends Object>() {
     if (injectsMap.containsKey(T.toString())) {
@@ -39,7 +40,7 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
     });
   }
 
-  initReference() {
+  _initReference() {
     return FirebaseFirestore.instance
         .collection(this.collectionName)
         .withConverter(
@@ -61,12 +62,19 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
         .then((snapshot) => snapshot.data() as T);
   }
 
+  Stream<T> streamFind({String? id}) {
+    return _collectionReference
+        .doc(id)
+        .snapshots()
+        .map((snapshot) => snapshot.data() as T);
+  }
+
   Future<T> first({Query queryBuilder(Query query)?}) async {
-    Query query = _collectionReference;
+    Query _query = _collectionReference;
     if (queryBuilder != null) {
-      query = queryBuilder(query);
+      _query = queryBuilder(_query);
     }
-    return await query
+    return await _query
         .limit(1)
         .get()
         .then((snapshot) => snapshot.docs.first.data() as T);
@@ -82,11 +90,11 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
   }
 
   Future<List<T?>> get({Query queryBuilder(Query query)?}) async {
-    Query query = _collectionReference;
+    Query _query = _collectionReference;
     if (queryBuilder != null) {
-      query = queryBuilder(query);
+      _query = queryBuilder(_query);
     }
-    QuerySnapshot snapshot = await query.get();
+    QuerySnapshot snapshot = await _query.get();
     return snapshot.docs.map<T?>((doc) {
       T _model = doc.data() as T;
       _model.docId = doc.id;
@@ -96,6 +104,19 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
 
   Stream<List<T?>>? streamAll() {
     Stream<QuerySnapshot> snapshot = _collectionReference.snapshots();
+    return snapshot.map((event) => event.docs.map<T?>((doc) {
+          T _model = doc.data() as T;
+          _model.docId = doc.id;
+          return _model;
+        }).toList());
+  }
+
+  Stream<List<T?>>? streamGet({Query queryBuilder(Query query)?}) {
+    Query _query = _collectionReference;
+    if (queryBuilder != null) {
+      _query = queryBuilder(_query);
+    }
+    Stream<QuerySnapshot> snapshot = _query.snapshots();
     return snapshot.map((event) => event.docs.map<T?>((doc) {
           T _model = doc.data() as T;
           _model.docId = doc.id;
@@ -121,18 +142,24 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
     return await _collectionReference.doc(this.docId).delete();
   }
 
-  Future<List<T?>> paginate(
-      {int perPage = 1, Query queryBuilder(Query query)?}) async {
-    Query query = _collectionReference;
+  Query _handlePaginateQuery({int? perPage, Query queryBuilder(Query query)?}) {
+    Query _query = _collectionReference;
     if (queryBuilder != null) {
-      query = queryBuilder(query);
+      _query = queryBuilder(_query);
     }
     DocumentSnapshot? lastDocument = pagination[this.collectionName];
     if (lastDocument != null) {
-      query = query.startAfterDocument(lastDocument);
+      _query = _query.startAfterDocument(lastDocument);
     }
-    query = query.limit(perPage);
-    QuerySnapshot snapshot = await query.get();
+    _query = _query.limit(perPage ?? this.perPage);
+    return _query;
+  }
+
+  Future<List<T?>> paginate(
+      {int? perPage, Query queryBuilder(Query query)?}) async {
+    QuerySnapshot snapshot =
+        await _handlePaginateQuery(perPage: perPage, queryBuilder: queryBuilder)
+            .get();
     if (snapshot.docs.length > 0 &&
         snapshot.docs.last is QueryDocumentSnapshot<T>) {
       pagination[this.collectionName] = snapshot.docs.last;
@@ -144,6 +171,26 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
       _model.docId = doc.id;
       return _model;
     }).toList();
+  }
+
+  Stream<List<T?>> streamPaginate(
+      {int? perPage, Query queryBuilder(Query query)?}) {
+    Stream<QuerySnapshot> snapshot =
+        _handlePaginateQuery(perPage: perPage, queryBuilder: queryBuilder)
+            .snapshots();
+    return snapshot.map((event) {
+      if (event.docs.length > 0 &&
+          event.docs.last is QueryDocumentSnapshot<T>) {
+        pagination[this.collectionName] = event.docs.last;
+      } else {
+        print("End of documents in collection ${this.collectionName}");
+      }
+      return event.docs.map<T?>((doc) {
+        T _model = doc.data() as T;
+        _model.docId = doc.id;
+        return _model;
+      }).toList();
+    });
   }
 
   Future<bool> exists(String docId) async {

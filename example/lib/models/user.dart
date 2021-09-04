@@ -21,4 +21,7 @@ class User extends FirestoreModel<User> {
 
   @override
   ResponseBuilder<User> get responseBuilder => (map) => User.formMap(map);
+
+  @override
+  int get perPage => 1;
 }
