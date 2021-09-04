@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 void main() async {
   await FirebaseApp.initializeApp();
+  FirestoreModel.inject(User());
   runApp(MyApp());
 }
 
@@ -56,11 +57,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _user.paginate().then((values) => users.addAll(values));
+    FirestoreModel.use<User>()
+        .paginate()
+        .then((values) => users.addAll(values));
   }
 
   void loadMore() {
-    _user.paginate().then((values) {
+    FirestoreModel.use<User>().paginate().then((values) {
       setState(() {
         users.addAll(values);
       });
@@ -109,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // Center is a layout widget. It takes a single child and positions it
           // in the middle of the parent.
           /*child: StreamBuilder<List<User?>>(
-          stream: User().streamAll(),
+          stream: FirestoreModel.use<User>().streamAll(),
           builder: (_, snapshot) {
             if (snapshot.hasData) {
               List<User?>? users = snapshot.data;

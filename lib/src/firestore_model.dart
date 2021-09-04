@@ -5,10 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 typedef ResponseBuilder<T> = T Function(dynamic);
 
 final Map<String, DocumentSnapshot<Object?>> pagination = {};
+final Map<String, Object> injectsMap = {};
 
 mixin MixinFirestoreModel<T> {
   String? docId;
-  Map<String, Object?> get toMap;
+  Map<String, dynamic> get toMap;
   ResponseBuilder<T> get responseBuilder;
   String get collectionName {
     return this.runtimeType.toString();
@@ -18,6 +19,19 @@ mixin MixinFirestoreModel<T> {
 abstract class FirestoreModel<T extends MixinFirestoreModel>
     with MixinFirestoreModel<T> {
   CollectionReference get _collectionReference => initReference();
+
+  static T use<T extends Object>() {
+    if (injectsMap.containsKey(T.toString())) {
+      return injectsMap[T.toString()] as T;
+    }
+    throw Exception("FirestoreModel ${T.toString()} Not Found");
+  }
+
+  static void inject(Object t) {
+    if (!injectsMap.containsKey(t.runtimeType.toString())) {
+      injectsMap[t.runtimeType.toString()] = t;
+    }
+  }
 
   initReference() {
     return FirebaseFirestore.instance
