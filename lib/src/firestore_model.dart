@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 typedef ResponseBuilder<T> = T Function(dynamic);
 
+final Map<String, DocumentSnapshot<Object?>> pagination = {};
+
 mixin MixinFirestoreModel<T> {
   String? docId;
   Map<String, Object?> get toMap;
@@ -97,5 +99,30 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
       this.docId = docId;
     }
     return await _collectionReference.doc(this.docId).delete();
+  }
+
+  Future<List<T?>> paginate(
+      {int perPage = 1, Query queryBuilder(Query query)?}) async {
+    Query query = _collectionReference;
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
+    }
+    DocumentSnapshot? lastDocument = pagination[this.collectionName];
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+    query = query.limit(perPage);
+    QuerySnapshot snapshot = await query.get();
+    if (snapshot.docs.length > 0 &&
+        snapshot.docs.last is QueryDocumentSnapshot<T>) {
+      pagination[this.collectionName] = snapshot.docs.last;
+    } else {
+      print("End of documents in collection ${this.collectionName}");
+    }
+    return snapshot.docs.map<T?>((doc) {
+      T _model = doc.data() as T;
+      _model.docId = doc.id;
+      return _model;
+    }).toList();
   }
 }

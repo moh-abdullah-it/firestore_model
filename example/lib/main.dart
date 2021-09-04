@@ -51,6 +51,21 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   User _user = User(firstName: "mohamed 3", lastName: "Abdullah 3");
   int _counter = 0;
+  List<User?> users = <User?>[];
+
+  @override
+  void initState() {
+    super.initState();
+    _user.paginate().then((values) => users.addAll(values));
+  }
+
+  void loadMore() {
+    _user.paginate().then((values) {
+      setState(() {
+        users.addAll(values);
+      });
+    });
+  }
 
   void _addUser() async {
     await _user.create();
@@ -82,9 +97,18 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: StreamBuilder<List<User?>>(
+          child: ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (_, index) {
+                return ListTile(
+                  title: Text(
+                      "${users[index]?.firstName} ${users[index]?.lastName}"),
+                  subtitle: Text(users[index]?.docId ?? ''),
+                );
+              })
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          /*child: StreamBuilder<List<User?>>(
           stream: User().streamAll(),
           builder: (_, snapshot) {
             if (snapshot.hasData) {
@@ -99,8 +123,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       leading: IconButton(
                         onPressed: () {
                           User? user = users?[index];
-                          /*user?.firstName = 'new firstname';
-                          user?.save();*/
+                          */ /*user?.firstName = 'new firstname';
+                          user?.save();*/ /*
                           user?.update(data: {
                             "first_name": "Mohamed",
                             "last_name": "Abdullah"
@@ -117,10 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
             }
             return CircularProgressIndicator();
           },
-        ),
-      ),
+        ),*/
+          ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _user.create(),
+        onPressed: () => loadMore(),
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
