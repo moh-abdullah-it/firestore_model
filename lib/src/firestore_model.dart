@@ -70,7 +70,17 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
         }).toList());
   }
 
-  update() {}
+  save() async {
+    return await _collectionReference.doc(this.docId).update(this.toMap);
+  }
+
+  update({String? docId, required Map<String, Object?> data}) async {
+    if (docId != null) {
+      this.docId = docId;
+    }
+    return await _collectionReference.doc(this.docId).update(data);
+  }
+
   delete({String? docId}) async {
     if (docId != null) {
       this.docId = docId;

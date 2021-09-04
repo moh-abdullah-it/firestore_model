@@ -93,8 +93,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemCount: users?.length,
                   itemBuilder: (_, index) {
                     return ListTile(
-                      title: Text(users?[index]?.firstName ?? ''),
+                      title: Text(
+                          "${users?[index]?.firstName} ${users?[index]?.lastName}"),
                       subtitle: Text(users?[index]?.docId ?? ''),
+                      leading: IconButton(
+                        onPressed: () {
+                          User? user = users?[index];
+                          /*user?.firstName = 'new firstname';
+                          user?.save();*/
+                          user?.update(data: {
+                            "first_name": "Mohamed",
+                            "last_name": "Abdullah"
+                          });
+                        },
+                        icon: Icon(Icons.edit),
+                      ),
                       trailing: IconButton(
                         onPressed: () => users?[index]?.delete(),
                         icon: Icon(Icons.delete),
