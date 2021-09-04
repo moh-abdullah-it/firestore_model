@@ -33,6 +33,12 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
     }
   }
 
+  static void injectAll(List<Object> list) {
+    list.forEach((t) {
+      inject(t);
+    });
+  }
+
   initReference() {
     return FirebaseFirestore.instance
         .collection(this.collectionName)
