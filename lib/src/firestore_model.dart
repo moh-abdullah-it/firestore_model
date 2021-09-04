@@ -4,22 +4,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 typedef ResponseBuilder<T> = T Function(dynamic);
 
-abstract class FirestoreModel<T extends Object> {
-  Map<String, dynamic> get toMap;
+mixin MixinFirestoreModel<T> {
+  String? docId;
+  Map<String, Object?> get toMap;
   ResponseBuilder<T> get responseBuilder;
-
   String get collectionName {
     return this.runtimeType.toString();
   }
+}
 
+abstract class FirestoreModel<T extends MixinFirestoreModel>
+    with MixinFirestoreModel<T> {
   CollectionReference get _collectionReference => initReference();
 
   initReference() {
     return FirebaseFirestore.instance
         .collection(this.collectionName)
         .withConverter(
-            fromFirestore: (snapshot, _) => responseBuilder(snapshot.data()),
-            toFirestore: (snapshot, _) => toMap);
+            fromFirestore: (snapshot, _) =>
+                this.responseBuilder(snapshot.data()),
+            toFirestore: (snapshot, _) => this.toMap);
   }
 
   create({String? docId}) async {
@@ -35,23 +39,35 @@ abstract class FirestoreModel<T extends Object> {
         .then((snapshot) => snapshot.data() as T);
   }
 
-  Future<List<T>> all() async {
+  Future<List<T?>> all() async {
     QuerySnapshot snapshot = await _collectionReference.get();
-    return snapshot.docs.map((doc) => doc.data() as T).toList();
+    return snapshot.docs.map<T?>((doc) {
+      T _model = doc.data() as T;
+      _model.docId = doc.id;
+      return _model;
+    }).toList();
   }
 
-  Future<List<T>> get({Query queryBuilder(Query query)?}) async {
+  Future<List<T?>> get({Query queryBuilder(Query query)?}) async {
     Query query = _collectionReference;
     if (queryBuilder != null) {
       query = queryBuilder(query);
     }
     QuerySnapshot snapshot = await query.get();
-    return snapshot.docs.map((doc) => doc.data() as T).toList();
+    return snapshot.docs.map<T?>((doc) {
+      T _model = doc.data() as T;
+      _model.docId = doc.id;
+      return _model;
+    }).toList();
   }
 
-  Stream<List<T>> streamAll() {
+  Stream<List<T?>>? streamAll() {
     Stream<QuerySnapshot> snapshot = _collectionReference.snapshots();
-    return snapshot.map((event) => event.docs.map((e) => e as T).toList());
+    return snapshot.map((event) => event.docs.map<T?>((doc) {
+          T _model = doc.data() as T;
+          _model.docId = doc.id;
+          return _model;
+        }).toList());
   }
 
   update() {}
