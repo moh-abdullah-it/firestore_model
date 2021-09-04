@@ -3,7 +3,10 @@ import 'package:firestore_model/firestore_model.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
-  await FirebaseApp.initializeApp();
+  await FirebaseApp.initializeApp(
+      settings: FirestoreModelSettings(
+          //persistenceEnabled: true,
+          ));
   FirestoreModel.inject(User());
   runApp(MyApp());
 }
