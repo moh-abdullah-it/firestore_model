@@ -24,4 +24,7 @@ class User extends FirestoreModel<User> {
 
   @override
   int get perPage => 1;
+
+  @override
+  String get collectionName => 'users';
 }

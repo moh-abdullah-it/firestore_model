@@ -59,6 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    FirestoreModel.use<User>().first(
+        queryBuilder: (query) => query
+            .where('score', isGreaterThan: 100)
+            .orderBy('score', descending: true));
     FirestoreModel.use<User>()
         .paginate()
         .then((values) => users.addAll(values));
@@ -78,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _addUser() async {
-    await _user.create();
+    await _user.create(docId: 'hdoihvnoirejiu9345j');
   }
 
   @override

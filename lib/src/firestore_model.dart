@@ -55,16 +55,16 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
     });
   }
 
-  Future<T> find({String? id}) async {
+  Future<T> find(String? docId) async {
     return await _collectionReference
-        .doc(id)
+        .doc(docId)
         .get()
         .then((snapshot) => snapshot.data() as T);
   }
 
-  Stream<T> streamFind({String? id}) {
+  Stream<T> streamFind(String? docId) {
     return _collectionReference
-        .doc(id)
+        .doc(docId)
         .snapshots()
         .map((snapshot) => snapshot.data() as T);
   }
