@@ -56,17 +56,19 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
   }
 
   Future<T> find(String? docId) async {
-    return await _collectionReference
-        .doc(docId)
-        .get()
-        .then((snapshot) => snapshot.data() as T);
+    return await _collectionReference.doc(docId).get().then((doc) {
+      T _model = doc.data() as T;
+      _model.docId = doc.id;
+      return _model;
+    });
   }
 
   Stream<T> streamFind(String? docId) {
-    return _collectionReference
-        .doc(docId)
-        .snapshots()
-        .map((snapshot) => snapshot.data() as T);
+    return _collectionReference.doc(docId).snapshots().map((doc) {
+      T _model = doc.data() as T;
+      _model.docId = doc.id;
+      return _model;
+    });
   }
 
   Future<T> first({Query queryBuilder(Query query)?}) async {
@@ -74,10 +76,11 @@ abstract class FirestoreModel<T extends MixinFirestoreModel>
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
     }
-    return await _query
-        .limit(1)
-        .get()
-        .then((snapshot) => snapshot.docs.first.data() as T);
+    return await _query.limit(1).get().then((snapshot) {
+      T _model = snapshot.docs.last.data() as T;
+      _model.docId = snapshot.docs.last.id;
+      return _model;
+    });
   }
 
   Future<List<T?>> all() async {
