@@ -1,5 +1,6 @@
-## 0.3.0
+## 0.4.0
 * modify `find` && `first` to add document id to current model.
+* modify documents in code.
 
 ## 0.2.0
 * update documentations.

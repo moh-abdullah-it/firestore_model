@@ -111,7 +111,7 @@ user.update(data: {
 "last_name": "Abdullah"
 })
 ```
-* update specific model in your model use `update` by pass docId:
+* update specific model use `update` by pass docId:
 ```dart
 FirestoreModel.use<User>().update(
   docId: 'hdoihvnoirejiu9345j',
@@ -131,7 +131,7 @@ FirestoreModel.use<User>().delete(docId: 'hdoihvnoirejiu9345j')
 ```
 
 ## Exists
-* check if document is exists `exists` by docId:
+* check if document is exists call `exists` by docId:
 ```dart
 bool isExists = await FirestoreModel.use<User>().exists('hdoihvnoirejiu9345j')
 ```
