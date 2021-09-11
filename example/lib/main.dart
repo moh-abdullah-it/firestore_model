@@ -106,6 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: snapshot.data?.length,
                 itemBuilder: (_, index) {
                   return ListTile(
+                    onTap: () {
+                      snapshot.data?[index]?.update(data: {});
+                    },
                     title: Text(
                         "${snapshot.data?[index]?.firstName} ${snapshot.data?[index]?.lastName}"),
                     subtitle: Text(snapshot.data?[index]?.docId ?? ''),

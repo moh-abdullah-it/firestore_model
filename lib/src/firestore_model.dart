@@ -12,6 +12,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// init Firestore with collection name
   CollectionReference get _collectionReference => _initReference();
 
+  bool isUpdating = false;
+
   /// retrieve Your model FirestoreModel.use<Model>()
   static T use<T extends Object>() {
     if (_injectsMap.containsKey(T.toString())) {
@@ -35,13 +37,18 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     });
   }
 
+  _responseBuilder(Map<String, dynamic>? map) {
+    this.createdAt = map?['createdAt'];
+    this.updatedAt = map?['updatedAt'];
+    return this.responseBuilder(map);
+  }
+
   _initReference() {
     return FirebaseFirestore.instance
         .collection(this.collectionName)
         .withConverter(
-            fromFirestore: (snapshot, _) =>
-                this.responseBuilder(snapshot.data()),
-            toFirestore: (snapshot, _) => this.toMap);
+            fromFirestore: (snapshot, _) => _responseBuilder(snapshot.data()),
+            toFirestore: (snapshot, _) => _dataMap());
   }
 
   T _toModel(DocumentSnapshot doc) {
@@ -49,6 +56,23 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     _model.docId = doc.id;
     _model.path = doc.reference.path;
     return _model;
+  }
+
+  Map<String, dynamic> _dataMap({Map<String, dynamic>? map}) {
+    Map<String, dynamic> _data = <String, dynamic>{};
+    _data.addAll(map ?? this.toMap);
+    if (this.withTimestamps) {
+      if (this.isUpdating) {
+        _data.addAll({
+          'updatedAt': Timestamp.now(),
+        });
+      } else {
+        _data.addAll({
+          'createdAt': Timestamp.now(),
+        });
+      }
+    }
+    return _data;
   }
 
   /// To Write in firestore database
@@ -162,7 +186,11 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// user.firstName = 'new firstname';
   /// user.save()
   Future<void> save() async {
-    return await _collectionReference.doc(this.docId).update(this.toMap);
+    this.isUpdating = true;
+    return await _collectionReference
+        .doc(this.docId)
+        .update(_dataMap())
+        .then((value) => this.isUpdating = false);
   }
 
   /// update specific fields in your model call [update] by pass [data]
@@ -182,7 +210,11 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     if (docId != null) {
       this.docId = docId;
     }
-    return await _collectionReference.doc(this.docId).update(data);
+    this.isUpdating = true;
+    return await _collectionReference
+        .doc(this.docId)
+        .update(_dataMap(map: data))
+        .then((value) => this.isUpdating = false);
   }
 
   /// delete current model call [delete]

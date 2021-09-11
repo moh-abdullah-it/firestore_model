@@ -1,6 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 typedef ResponseBuilder<T> = T Function(dynamic);
 
 mixin Model<T> {
+  /// default true set timestamps
+  bool get withTimestamps => true;
+
+  Timestamp? createdAt;
+
+  Timestamp? updatedAt;
+
   /// default items in page
   int get perPage => 20;
 
