@@ -59,13 +59,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    FirestoreModel.use<User>().first(
+    /*FirestoreModel.use<User>().first(
         queryBuilder: (query) => query
             .where('score', isGreaterThan: 100)
-            .orderBy('score', descending: true));
-    FirestoreModel.use<User>()
+            .orderBy('score', descending: true));*/
+    /* FirestoreModel.use<User>()
         .paginate()
-        .then((values) => users.addAll(values));
+        .then((values) => users.addAll(values));*/
   }
 
   void loadMore() {
@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _addUser() async {
-    await _user.create(docId: 'hdoihvnoirejiu9345j');
+    await _user.create();
   }
 
   @override
@@ -100,7 +100,20 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-          child: ListView.builder(
+        child: ModelStreamGetBuilder<User>(
+          builder: (_, snapshot) {
+            return ListView.builder(
+                itemCount: snapshot.data?.length,
+                itemBuilder: (_, index) {
+                  return ListTile(
+                    title: Text(
+                        "${snapshot.data?[index]?.firstName} ${snapshot.data?[index]?.lastName}"),
+                    subtitle: Text(snapshot.data?[index]?.docId ?? ''),
+                  );
+                });
+          },
+        ),
+        /*child: ListView.builder(
               itemCount: users.length,
               itemBuilder: (_, index) {
                 return ListTile(
@@ -108,10 +121,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       "${users[index]?.firstName} ${users[index]?.lastName}"),
                   subtitle: Text(users[index]?.docId ?? ''),
                 );
-              })
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          /*child: StreamBuilder<List<User?>>(
+              })*/
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        /*child: StreamBuilder<List<User?>>(
           stream: FirestoreModel.use<User>().streamAll(),
           builder: (_, snapshot) {
             if (snapshot.hasData) {
@@ -145,9 +158,9 @@ class _MyHomePageState extends State<MyHomePage> {
             return CircularProgressIndicator();
           },
         ),*/
-          ),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => loadMore(),
+        onPressed: () => _addUser(),
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

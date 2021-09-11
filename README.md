@@ -198,3 +198,33 @@ Stream<List<User>> topUsers = await FirestoreModel.use<User>().streamPaginate(
     queryBuilder: (query) => query.orderBy('score', descending: true),
     );
 ```
+
+## Builders
+* `ModelSingleBuilder`: get `first` or `find` by docId.
+```dart
+ModelSingleBuilder<User>(
+builder: (_, snapshot) {
+// your widget
+});
+```
+* `ModelGetBuilder`: get documents with any `query`.
+```dart
+ModelGetBuilder<User>(
+builder: (_, snapshot) {
+// your list builder
+});
+```
+* `ModelStreamGetBuilder`: stream `get` documents with any `query`.
+```dart
+ModelStreamGetBuilder<User>(
+builder: (_, snapshot) {
+// your list builder
+});
+```
+* `ModelStreamSingleBuilder`: stream `first` or `find` by docId.
+```dart
+ModelStreamSingleBuilder<User>(
+builder: (_, snapshot) {
+// your widget
+});
+```

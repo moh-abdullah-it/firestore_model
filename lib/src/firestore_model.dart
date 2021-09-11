@@ -76,7 +76,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
 
   /// To get document data by document id call [find] and pass [docId]
   /// User user = await [FirestoreModel].use<User>().find('doc_id')
-  Future<T> find(String? docId) async {
+  Future<T> find(String docId) async {
     return await _collectionReference.doc(docId).get().then((doc) {
       T _model = doc.data() as T;
       _model.docId = doc.id;
@@ -87,7 +87,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// To stream document data by document id call [streamFind] as pass [docId]
   /// Stream<User> streamUser = [FirestoreModel].use<User>()
   /// .streamFind('doc_id')
-  Stream<T> streamFind(String? docId) {
+  Stream<T> streamFind(String docId) {
     return _collectionReference.doc(docId).snapshots().map((doc) {
       T _model = doc.data() as T;
       _model.docId = doc.id;
@@ -107,8 +107,23 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
       _query = queryBuilder(_query);
     }
     return await _query.limit(1).get().then((snapshot) {
-      T _model = snapshot.docs.last.data() as T;
-      _model.docId = snapshot.docs.last.id;
+      T _model = snapshot.docs.first.data() as T;
+      _model.docId = snapshot.docs.first.id;
+      return _model;
+    });
+  }
+
+  /// To stream document data by document id call [streamFind] as pass [docId]
+  /// Stream<User> streamUser = [FirestoreModel].use<User>()
+  /// .streamFind('doc_id')
+  Stream<T> streamFirst({Query queryBuilder(Query query)?}) {
+    Query _query = _collectionReference;
+    if (queryBuilder != null) {
+      _query = queryBuilder(_query);
+    }
+    return _collectionReference.limit(1).snapshots().map((snapshot) {
+      T _model = snapshot.docs.first.data() as T;
+      _model.docId = snapshot.docs.first.id;
       return _model;
     });
   }
@@ -165,6 +180,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     }
     Stream<QuerySnapshot> snapshot = _query.snapshots();
     return snapshot.map((event) => event.docs.map<T?>((doc) {
+          print("model");
           T _model = doc.data() as T;
           _model.docId = doc.id;
           return _model;
