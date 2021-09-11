@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firestore_model/src/settings.dart';
 import 'package:flutter/widgets.dart';
 
+export 'src/core/model.dart';
 export 'src/firestore_model.dart';
 export 'src/settings.dart';
 export 'src/widgets/model_get_builder.dart';

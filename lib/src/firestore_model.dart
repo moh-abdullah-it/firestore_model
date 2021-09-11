@@ -2,30 +2,11 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-typedef ResponseBuilder<T> = T Function(dynamic);
+import 'core/model.dart';
 
 final Map<String, DocumentSnapshot<Object?>> _pagination = {};
 
 final Map<String, Object> _injectsMap = {};
-
-mixin Model<T> {
-  /// default items in page
-  int get perPage => 20;
-
-  /// document id [FirestoreModel] will get it for your model
-  String? docId;
-
-  /// model mapping to write in collection
-  Map<String, dynamic> get toMap;
-
-  /// model mapping to write in collection
-  ResponseBuilder<T> get responseBuilder;
-
-  /// collection name [FirestoreModel] use your [Model] name
-  String get collectionName {
-    return this.runtimeType.toString();
-  }
-}
 
 abstract class FirestoreModel<T extends Model> with Model<T> {
   /// init Firestore with collection name
@@ -63,13 +44,20 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
             toFirestore: (snapshot, _) => this.toMap);
   }
 
+  T _toModel(DocumentSnapshot doc) {
+    T _model = doc.data() as T;
+    _model.docId = doc.id;
+    _model.path = doc.reference.path;
+    return _model;
+  }
+
   /// To Write in firestore database
   /// call [create] method from your model like this:
   /// user.create();
   /// if you have [docId] for doc:
   /// user.create(docId: 'doc_id');
-  create({String? docId}) async {
-    await _collectionReference.doc(docId).set(this).catchError((error) {
+  Future<void> create({String? docId}) async {
+    return await _collectionReference.doc(docId).set(this).catchError((error) {
       print("Failed to add user: $error");
     });
   }
@@ -78,9 +66,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// User user = await [FirestoreModel].use<User>().find('doc_id')
   Future<T> find(String docId) async {
     return await _collectionReference.doc(docId).get().then((doc) {
-      T _model = doc.data() as T;
-      _model.docId = doc.id;
-      return _model;
+      return _toModel(doc);
     });
   }
 
@@ -89,9 +75,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// .streamFind('doc_id')
   Stream<T> streamFind(String docId) {
     return _collectionReference.doc(docId).snapshots().map((doc) {
-      T _model = doc.data() as T;
-      _model.docId = doc.id;
-      return _model;
+      return _toModel(doc);
     });
   }
 
@@ -107,9 +91,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
       _query = queryBuilder(_query);
     }
     return await _query.limit(1).get().then((snapshot) {
-      T _model = snapshot.docs.first.data() as T;
-      _model.docId = snapshot.docs.first.id;
-      return _model;
+      return _toModel(snapshot.docs.first);
     });
   }
 
@@ -122,9 +104,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
       _query = queryBuilder(_query);
     }
     return _collectionReference.limit(1).snapshots().map((snapshot) {
-      T _model = snapshot.docs.first.data() as T;
-      _model.docId = snapshot.docs.first.id;
-      return _model;
+      return _toModel(snapshot.docs.first);
     });
   }
 
@@ -133,9 +113,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   Future<List<T?>> all() async {
     QuerySnapshot snapshot = await _collectionReference.get();
     return snapshot.docs.map<T?>((doc) {
-      T _model = doc.data() as T;
-      _model.docId = doc.id;
-      return _model;
+      return _toModel(doc);
     }).toList();
   }
 
@@ -151,9 +129,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     }
     QuerySnapshot snapshot = await _query.get();
     return snapshot.docs.map<T?>((doc) {
-      T _model = doc.data() as T;
-      _model.docId = doc.id;
-      return _model;
+      return _toModel(doc);
     }).toList();
   }
 
@@ -163,9 +139,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   Stream<List<T?>>? streamAll() {
     Stream<QuerySnapshot> snapshot = _collectionReference.snapshots();
     return snapshot.map((event) => event.docs.map<T?>((doc) {
-          T _model = doc.data() as T;
-          _model.docId = doc.id;
-          return _model;
+          return _toModel(doc);
         }).toList());
   }
 
@@ -180,17 +154,14 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     }
     Stream<QuerySnapshot> snapshot = _query.snapshots();
     return snapshot.map((event) => event.docs.map<T?>((doc) {
-          print("model");
-          T _model = doc.data() as T;
-          _model.docId = doc.id;
-          return _model;
+          return _toModel(doc);
         }).toList());
   }
 
   /// make changes to your model and call [save]
   /// user.firstName = 'new firstname';
   /// user.save()
-  save() async {
+  Future<void> save() async {
     return await _collectionReference.doc(this.docId).update(this.toMap);
   }
 
@@ -206,7 +177,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   ///     "first_name": "Mohamed",
   ///     "last_name": "Abdullah"
   ///   })
-  update({String? docId, required Map<String, Object?> data}) async {
+  Future<void> update(
+      {String? docId, required Map<String, Object?> data}) async {
     if (docId != null) {
       this.docId = docId;
     }
@@ -217,7 +189,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// user.delete();
   /// delete specific model use delete by pass docId:
   /// [FirestoreModel].use<User>().delete(docId: 'doc_id')
-  delete({String? docId}) async {
+  Future<void> delete({String? docId}) async {
     if (docId != null) {
       this.docId = docId;
     }
@@ -256,9 +228,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
       print("End of documents in collection ${this.collectionName}");
     }
     return snapshot.docs.map<T?>((doc) {
-      T _model = doc.data() as T;
-      _model.docId = doc.id;
-      return _model;
+      return _toModel(doc);
     }).toList();
   }
 
@@ -280,9 +250,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
         print("End of documents in collection ${this.collectionName}");
       }
       return event.docs.map<T?>((doc) {
-        T _model = doc.data() as T;
-        _model.docId = doc.id;
-        return _model;
+        return _toModel(doc);
       }).toList();
     });
   }
