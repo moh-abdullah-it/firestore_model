@@ -1,6 +1,6 @@
 name: firestore_model
 description: Firestore Model easy to use firestore collections by model data
-version: 0.4.0
+version: 0.5.0
 homepage: https://github.com/moh-abdullah-it/firestore_model
 
 environment:
