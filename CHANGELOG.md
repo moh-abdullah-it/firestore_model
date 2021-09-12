@@ -1,3 +1,7 @@
+## 0.6.0
+* modify `path` document in firestore database
+* modify `withTimestamps` this add `createdAt` & `updatedAt` to track document
+
 ## 0.5.0
 * modify widgets builders:
   * `ModelSingleBuilder`: get `first` or `find` by docId.
