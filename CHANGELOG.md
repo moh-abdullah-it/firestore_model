@@ -1,3 +1,11 @@
+## 0.7.0
+* add `FieldValue` fields options:
+  * `increment`: increment field value
+  * `decrement`: decrement field value
+  * `arrayUnion`: union elements to array
+  * `arrayRemove`: remove elements from array
+  * `remove`: remove field from document
+
 ## 0.6.0
 * modify `path` document in firestore database
 * modify `withTimestamps` this add `createdAt` & `updatedAt` to track document

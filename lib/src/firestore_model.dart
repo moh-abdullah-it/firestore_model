@@ -62,15 +62,10 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     Map<String, dynamic> _data = <String, dynamic>{};
     _data.addAll(map ?? this.toMap);
     if (this.withTimestamps) {
-      if (this.isUpdating) {
-        _data.addAll({
-          'updatedAt': Timestamp.now(),
-        });
-      } else {
-        _data.addAll({
-          'createdAt': Timestamp.now(),
-        });
-      }
+      _data.addAll({
+        '${this.isUpdating ? 'updatedAt' : 'createdAt'}':
+            FieldValue.serverTimestamp(),
+      });
     }
     return _data;
   }
@@ -295,5 +290,63 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
         .doc(docId)
         .get()
         .then((value) => value.exists);
+  }
+
+  /// update [field] realtime value
+  /// that tells the server to [increment] the [field]’s current [value] by the given [value].
+  Future<void> increment({
+    required String field,
+    String? docId,
+    num value = 1,
+  }) async {
+    if (docId != null) {
+      this.docId = docId;
+    }
+    return await this
+        .update(docId: this.docId, data: {field: FieldValue.increment(value)});
+  }
+
+  /// update [field] realtime value
+  /// that tells the server to [decrement] the [field]’s current [value] by the given [value].
+  Future<void> decrement({
+    required String field,
+    String? docId,
+    num value = 1,
+  }) async {
+    return await this
+        .update(docId: this.docId, data: {field: FieldValue.increment(-value)});
+  }
+
+  /// update [field] realtime value
+  /// tells the server to [union] the given [elements]
+  /// with any array value that already exists on the server.
+  Future<void> arrayUnion({
+    required String field,
+    required List<dynamic> elements,
+    String? docId,
+  }) async {
+    return await this.update(
+        docId: this.docId, data: {field: FieldValue.arrayUnion(elements)});
+  }
+
+  /// update [field] realtime value
+  /// tells the server to [remove] the given
+  /// [elements] from any array value that already exists on the server.
+  Future<void> arrayRemove({
+    required String field,
+    required List<dynamic> elements,
+    String? docId,
+  }) async {
+    return await this.update(
+        docId: this.docId, data: {field: FieldValue.arrayRemove(elements)});
+  }
+
+  /// remove [field] from document
+  Future<void> remove({
+    required String field,
+    String? docId,
+  }) async {
+    return await this
+        .update(docId: this.docId, data: {field: FieldValue.delete()});
   }
 }

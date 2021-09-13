@@ -228,3 +228,9 @@ builder: (_, snapshot) {
 // your widget
 });
 ```
+## FieldValue
+* `increment`: increment field value
+* `decrement`: decrement field value
+* `arrayUnion`: union elements to array
+* `arrayRemove`: remove elements from array
+* `remove`: remove field from document

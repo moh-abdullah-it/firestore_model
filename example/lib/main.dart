@@ -1,5 +1,6 @@
 import 'package:example/models/user.dart';
 import 'package:firestore_model/firestore_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -53,7 +54,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  User _user = User(firstName: "mohamed 3", lastName: "Abdullah 3");
+  User _user = User(
+    firstName: "mohamed 3",
+    lastName: "Abdullah 3",
+    languages: ['php', 'dart', 'swift'],
+  );
   List<User?> users = <User?>[];
 
   @override
@@ -107,11 +112,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (_, index) {
                   return ListTile(
                     onTap: () {
-                      snapshot.data?[index]?.update(data: {});
+                      snapshot.data?[index]?.remove(field: 'languages');
                     },
                     title: Text(
                         "${snapshot.data?[index]?.firstName} ${snapshot.data?[index]?.lastName}"),
                     subtitle: Text(snapshot.data?[index]?.docId ?? ''),
+                    leading: IconButton(
+                      onPressed: () {
+                        snapshot.data?[index]?.arrayUnion(
+                            field: 'languages', elements: ['kotlin']);
+                      },
+                      icon: Icon(CupertinoIcons.plus_app),
+                    ),
+                    trailing: IconButton(
+                      onPressed: () {
+                        snapshot.data?[index]?.arrayRemove(
+                            field: 'languages', elements: ['kotlin']);
+                      },
+                      icon: Icon(CupertinoIcons.minus_circled),
+                    ),
                   );
                 });
           },
