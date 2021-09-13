@@ -141,8 +141,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// List<User> topUsers = await [FirestoreModel].use<User>().get(
   ///     queryBuilder: (query) => query.orderBy('score', descending: true).limit(10)
   ///     );
-  Future<List<T?>> get({Query queryBuilder(Query query)?}) async {
-    Query _query = _collectionReference;
+  Future<List<T?>> get({Query queryBuilder(Query query)?, Query? query}) async {
+    Query _query = query ?? _collectionReference;
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
     }
@@ -166,7 +166,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// Stream<List<User>> topUsers = await [FirestoreModel].use<User>().streamGet(
   ///     queryBuilder: (query) => query.orderBy('score', descending: true).limit(10)
   ///     );
-  Stream<List<T?>>? streamGet({Query queryBuilder(Query query)?}) {
+  Stream<List<T?>> streamGet({Query queryBuilder(Query query)?, Query? query}) {
     Query _query = _collectionReference;
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
@@ -202,12 +202,9 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   ///   })
   Future<void> update(
       {String? docId, required Map<String, Object?> data}) async {
-    if (docId != null) {
-      this.docId = docId;
-    }
     this.isUpdating = true;
     return await _collectionReference
-        .doc(this.docId)
+        .doc(docId ?? this.docId)
         .update(_dataMap(map: data))
         .then((value) => this.isUpdating = false);
   }
@@ -217,10 +214,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// delete specific model use delete by pass docId:
   /// [FirestoreModel].use<User>().delete(docId: 'doc_id')
   Future<void> delete({String? docId}) async {
-    if (docId != null) {
-      this.docId = docId;
-    }
-    return await _collectionReference.doc(this.docId).delete();
+    return await _collectionReference.doc(docId ?? this.docId).delete();
   }
 
   Query _handlePaginateQuery({int? perPage, Query queryBuilder(Query query)?}) {
@@ -299,11 +293,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     String? docId,
     num value = 1,
   }) async {
-    if (docId != null) {
-      this.docId = docId;
-    }
     return await this
-        .update(docId: this.docId, data: {field: FieldValue.increment(value)});
+        .update(docId: docId, data: {field: FieldValue.increment(value)});
   }
 
   /// update [field] realtime value
@@ -314,7 +305,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     num value = 1,
   }) async {
     return await this
-        .update(docId: this.docId, data: {field: FieldValue.increment(-value)});
+        .update(docId: docId, data: {field: FieldValue.increment(-value)});
   }
 
   /// update [field] realtime value
@@ -325,8 +316,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     required List<dynamic> elements,
     String? docId,
   }) async {
-    return await this.update(
-        docId: this.docId, data: {field: FieldValue.arrayUnion(elements)});
+    return await this
+        .update(docId: docId, data: {field: FieldValue.arrayUnion(elements)});
   }
 
   /// update [field] realtime value
@@ -337,8 +328,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     required List<dynamic> elements,
     String? docId,
   }) async {
-    return await this.update(
-        docId: this.docId, data: {field: FieldValue.arrayRemove(elements)});
+    return await this
+        .update(docId: docId, data: {field: FieldValue.arrayRemove(elements)});
   }
 
   /// remove [field] from document
@@ -346,7 +337,32 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     required String field,
     String? docId,
   }) async {
-    return await this
-        .update(docId: this.docId, data: {field: FieldValue.delete()});
+    return await this.update(docId: docId, data: {field: FieldValue.delete()});
+  }
+
+  Future<List<T?>> getSubCollection(
+    String subCollection, {
+    String? docId,
+    Query queryBuilder(Query query)?,
+  }) async {
+    Query? _query =
+        _collectionReference.doc(docId ?? this.docId).collection(subCollection);
+    if (queryBuilder != null) {
+      _query = queryBuilder(_query);
+    }
+    return await this.get(query: _query);
+  }
+
+  Stream<List<T?>> streamSubCollection(
+    String subCollection, {
+    String? docId,
+    Query queryBuilder(Query query)?,
+  }) {
+    Query? _query =
+        _collectionReference.doc(docId ?? this.docId).collection(subCollection);
+    if (queryBuilder != null) {
+      _query = queryBuilder(_query);
+    }
+    return this.streamGet(query: _query);
   }
 }
