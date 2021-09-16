@@ -4,8 +4,12 @@ import 'package:flutter/widgets.dart';
 import '../firestore_model.dart';
 
 class ModelGetBuilder<M extends FirestoreModel<M>> extends StatelessWidget {
-  const ModelGetBuilder({Key? key, required this.builder, this.query})
-      : super(key: key);
+  const ModelGetBuilder({
+    Key? key,
+    required this.builder,
+    this.query,
+    this.parentModel,
+  }) : super(key: key);
 
   /// The build strategy currently used by this builder.
   ///
@@ -18,10 +22,16 @@ class ModelGetBuilder<M extends FirestoreModel<M>> extends StatelessWidget {
   /// Can construct refined [Query] objects by adding filters and ordering.
   final Query Function(Query query)? query;
 
+  /// [parentModel] for this [subCollection]
+  final FirestoreModel? parentModel;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<M?>>(
-        future: FirestoreModel.use<M>().get(
+        future: (parentModel != null
+                ? parentModel?.subCollection<M>()
+                : FirestoreModel.use<M>())
+            ?.get(
           queryBuilder: query,
         ),
         initialData: <M>[],

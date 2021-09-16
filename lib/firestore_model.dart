@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 export 'src/core/model.dart';
 export 'src/firestore_model.dart';
 export 'src/settings.dart';
+export 'src/sub_collection_model.dart';
 export 'src/widgets/model_get_builder.dart';
 export 'src/widgets/model_single_builder.dart';
 export 'src/widgets/model_stream_get_builder.dart';

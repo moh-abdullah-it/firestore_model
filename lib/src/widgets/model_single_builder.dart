@@ -9,6 +9,7 @@ class ModelSingleBuilder<M extends FirestoreModel<M>> extends StatelessWidget {
     required this.builder,
     this.query,
     this.docId,
+    this.parentModel,
   }) : super(key: key);
 
   /// The build strategy currently used by this builder.
@@ -25,12 +26,21 @@ class ModelSingleBuilder<M extends FirestoreModel<M>> extends StatelessWidget {
   /// id of document
   final String? docId;
 
+  /// [parentModel] for this [subCollection]
+  final FirestoreModel? parentModel;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<M?>(
         future: this.docId != null
-            ? FirestoreModel.use<M>().find(this.docId!)
-            : FirestoreModel.use<M>().first(queryBuilder: query),
+            ? (parentModel != null
+                    ? parentModel?.subCollection<M>()
+                    : FirestoreModel.use<M>())
+                ?.find(this.docId!)
+            : (parentModel != null
+                    ? parentModel?.subCollection<M>()
+                    : FirestoreModel.use<M>())
+                ?.first(queryBuilder: query),
         builder: builder);
   }
 }

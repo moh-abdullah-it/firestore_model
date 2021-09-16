@@ -55,6 +55,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     T _model = doc.data() as T;
     _model.docId = doc.id;
     _model.path = doc.reference.path;
+    _model.parentPath = doc.reference.parent.path;
     return _model;
   }
 
@@ -364,5 +365,14 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
       _query = queryBuilder(_query);
     }
     return this.streamGet(query: _query);
+  }
+
+  S subCollection<S extends Model>({String? path}) {
+    if (_injectsMap.containsKey(S.toString())) {
+      S _model = _injectsMap[S.toString()] as S;
+      _model.parentPath = path ?? this.path;
+      return _model;
+    }
+    throw Exception("FirestoreModel ${S.toString()} Not Found");
   }
 }

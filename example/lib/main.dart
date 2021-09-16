@@ -1,4 +1,6 @@
+import 'package:example/models/post.dart';
 import 'package:example/models/user.dart';
+import 'package:example/profile.dart';
 import 'package:firestore_model/firestore_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +10,7 @@ void main() async {
       settings: FirestoreModelSettings(
           //persistenceEnabled: true,
           ));
-  FirestoreModel.inject(User());
+  FirestoreModel.injectAll([User(), Post()]);
   runApp(MyApp());
 }
 
@@ -111,8 +113,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: snapshot.data?.length,
                 itemBuilder: (_, index) {
                   return ListTile(
-                    onTap: () {
-                      snapshot.data?[index]?.remove(field: 'languages');
+                    onTap: () async {
+                      //User? user = snapshot.data?[index];
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => Profile(
+                          user: snapshot.data?[index],
+                        ),
+                      ));
+                      //snapshot.data?[index]?.remove(field: 'languages');
+                      /* user?.subCollection<Post>()
+                        ?..title = 'test post title'
+                        ..description = 'test description post'
+                        ..create();*/
                     },
                     title: Text(
                         "${snapshot.data?[index]?.firstName} ${snapshot.data?[index]?.lastName}"),

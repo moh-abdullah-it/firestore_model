@@ -1,12 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firestore_model/firestore_model.dart';
 import 'package:flutter/widgets.dart';
 
 import '../firestore_model.dart';
 
 class ModelStreamGetBuilder<M extends FirestoreModel<M>>
     extends StatelessWidget {
-  const ModelStreamGetBuilder({Key? key, required this.builder, this.query})
-      : super(key: key);
+  const ModelStreamGetBuilder({
+    Key? key,
+    required this.builder,
+    this.query,
+    this.parentModel,
+  }) : super(key: key);
 
   /// The build strategy currently used by this builder.
   ///
@@ -19,10 +24,16 @@ class ModelStreamGetBuilder<M extends FirestoreModel<M>>
   /// Can construct refined [Query] objects by adding filters and ordering.
   final Query Function(Query query)? query;
 
+  /// [parentModel] for this [subCollection]
+  final FirestoreModel? parentModel;
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<M?>>(
-        stream: FirestoreModel.use<M>().streamGet(
+        stream: (parentModel != null
+                ? parentModel?.subCollection<M>()
+                : FirestoreModel.use<M>())
+            ?.streamGet(
           queryBuilder: query,
         ),
         initialData: <M>[],

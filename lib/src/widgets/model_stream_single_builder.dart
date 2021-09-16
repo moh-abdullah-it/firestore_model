@@ -5,12 +5,13 @@ import '../firestore_model.dart';
 
 class ModelStreamSingleBuilder<M extends FirestoreModel<M>>
     extends StatelessWidget {
-  const ModelStreamSingleBuilder({
-    Key? key,
-    required this.builder,
-    this.query,
-    this.docId,
-  }) : super(key: key);
+  const ModelStreamSingleBuilder(
+      {Key? key,
+      required this.builder,
+      this.query,
+      this.docId,
+      this.parentModel})
+      : super(key: key);
 
   /// The build strategy currently used by this builder.
   ///
@@ -26,12 +27,21 @@ class ModelStreamSingleBuilder<M extends FirestoreModel<M>>
   /// id of document
   final String? docId;
 
+  /// [parentModel] for this [subCollection]
+  final FirestoreModel? parentModel;
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<M?>(
         stream: this.docId != null
-            ? FirestoreModel.use<M>().streamFind(this.docId!)
-            : FirestoreModel.use<M>().streamFirst(queryBuilder: query),
+            ? (parentModel != null
+                    ? parentModel?.subCollection<M>()
+                    : FirestoreModel.use<M>())
+                ?.streamFind(this.docId!)
+            : (parentModel != null
+                    ? parentModel?.subCollection<M>()
+                    : FirestoreModel.use<M>())
+                ?.streamFirst(queryBuilder: query),
         builder: builder);
   }
 }

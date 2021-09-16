@@ -20,6 +20,9 @@ mixin Model<T> {
   /// root of the database).
   String? path;
 
+  /// we will fill it if model is SubCollection
+  String? parentPath;
+
   /// model mapping to write in collection
   Map<String, dynamic> get toMap;
 

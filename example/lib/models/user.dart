@@ -1,9 +1,12 @@
 import 'package:firestore_model/firestore_model.dart';
 
+import 'post.dart';
+
 class User extends FirestoreModel<User> {
   String? firstName;
   String? lastName;
   List<String>? languages;
+  Post? post;
 
   User({this.firstName, this.lastName, this.languages});
 
@@ -28,4 +31,7 @@ class User extends FirestoreModel<User> {
 
   @override
   int get perPage => 1;
+
+  @override
+  String get collectionName => 'users';
 }
