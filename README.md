@@ -203,6 +203,10 @@ Stream<List<User>> topUsers = await FirestoreModel.use<User>().streamPaginate(
 * `ModelSingleBuilder`: get `first` or `find` by docId.
 ```dart
 ModelSingleBuilder<User>(
+// your query to get first result
+query: (q) => q.orderBy('createdAt'),
+// pass document id if you need to get only this document
+docId: 'iuiouurpoeuriqwe',
 builder: (_, snapshot) {
 // your widget
 });
@@ -210,6 +214,8 @@ builder: (_, snapshot) {
 * `ModelGetBuilder`: get documents with any `query`.
 ```dart
 ModelGetBuilder<User>(
+// your query to get results
+query: (q) => q.orderBy('createdAt'),
 builder: (_, snapshot) {
 // your list builder
 });
@@ -217,6 +223,8 @@ builder: (_, snapshot) {
 * `ModelStreamGetBuilder`: stream `get` documents with any `query`.
 ```dart
 ModelStreamGetBuilder<User>(
+// your query to stream results
+query: (q) => q.orderBy('createdAt'),
 builder: (_, snapshot) {
 // your list builder
 });
@@ -224,13 +232,96 @@ builder: (_, snapshot) {
 * `ModelStreamSingleBuilder`: stream `first` or `find` by docId.
 ```dart
 ModelStreamSingleBuilder<User>(
+// your query to stream first result
+query: (q) => q.orderBy('createdAt'),
+// pass document id if you need to stream only this document
+docId: 'iuiouurpoeuriqwe',
 builder: (_, snapshot) {
 // your widget
 });
 ```
+
 ## FieldValue
+
 * `increment`: increment field value
+```dart
+// this increase user score by 1;
+user.increment(field: 'score');
+
+// this increase user score by 2;
+user.increment(field: 'score', value: 2);
+```
+
 * `decrement`: decrement field value
+```dart
+// this decrease user score by 1;
+user.decrement(field: 'score');
+
+// this decrease user score by 2;
+user.decrement(field: 'score', value: 2);
+```
+
 * `arrayUnion`: union elements to array
+```dart
+// append 'kotlin' to user languages
+user.arrayUnion(field: 'languages', elements: ['kotlin']);
+```
+
 * `arrayRemove`: remove elements from array
+```dart
+// remove 'kotlin' from user languages
+user.arrayRemove(field: 'languages', elements: ['kotlin']);
+```
+
 * `remove`: remove field from document
+```dart
+// remove 'languages' field from user document
+user.remove(field: 'languages');
+```
+
+## SubCollection
+`SubCollection` is a collection associated with a specific document.
+### Prepare SubCollection Model
+* create `Model` for `SubCollection` and extends model with `SubCollectionModel` with your model Type:
+```dart
+class Post extends SubCollectionModel<Post> {
+}
+```
+* override `toMap` && `responseBuilder`
+* we use model name as subCollection name in this example `Post`
+* if you wont to change subCollection name override `subCollectionName` in your model
+```dart
+@override
+String get subCollectionName => 'posts';
+```
+### Create in SubCollection
+* use parent to work with subCollection
+```dart
+Post post = user.subCollection<Post>();
+post.title = "new test Title For post ${DateTime.now()}";
+post.description = "Description Title in post Sub collection";
+post.create();
+```
+
+### Update document in SubCollection
+```dart
+// use `update` to update document in subCollection
+post.update(data: {'title': 'updated title'});
+
+// or you can use `save`
+post.description = 'new description';
+post.save();
+```
+#### if you have `SubCollectionModel` you can work as any `FirestoreModel`
+
+### Builder With SubCollection
+* to use builders to retrieve subCollection Documents you must be have `parentModel`
+```dart
+ModelStreamGetBuilder<Post>(
+// parent model for Post SubCollectionModel
+parentModel: user,
+builder: (_, snapshot) {
+// your list builder
+}
+);
+```

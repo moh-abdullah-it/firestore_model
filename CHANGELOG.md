@@ -1,3 +1,8 @@
+## 0.8.0
+* modify support `subCollections` by parent model 
+* modify `builders` support `subCollections` by `parentModel`
+* update documentation
+
 ## 0.7.0
 * add `FieldValue` fields options:
   * `increment`: increment field value
