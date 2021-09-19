@@ -2,12 +2,12 @@ library firestore_model;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firestore_model/src/settings.dart';
+import 'package:firestore_model/src/core/settings.dart';
 import 'package:flutter/widgets.dart';
 
 export 'src/core/model.dart';
+export 'src/core/settings.dart';
 export 'src/firestore_model.dart';
-export 'src/settings.dart';
 export 'src/sub_collection_model.dart';
 export 'src/widgets/model_get_builder.dart';
 export 'src/widgets/model_single_builder.dart';

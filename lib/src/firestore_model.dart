@@ -78,7 +78,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// user.create(docId: 'doc_id');
   Future<void> create({String? docId}) async {
     return await _collectionReference.doc(docId).set(this).catchError((error) {
-      print("Failed to add user: $error");
+      print("Failed to add model: $error");
     });
   }
 
@@ -373,6 +373,6 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
       _model.parentPath = path ?? this.path;
       return _model;
     }
-    throw Exception("FirestoreModel ${S.toString()} Not Found");
+    throw Exception("SubCollectionModel ${S.toString()} Not Found");
   }
 }
