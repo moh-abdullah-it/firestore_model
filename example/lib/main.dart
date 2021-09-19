@@ -128,7 +128,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     title: Text(
                         "${snapshot.data?[index]?.firstName} ${snapshot.data?[index]?.lastName}"),
-                    subtitle: Text(snapshot.data?[index]?.docId ?? ''),
+                    subtitle:
+                        Text(snapshot.data?[index]?.createdAt.toString() ?? ''),
                     leading: IconButton(
                       onPressed: () {
                         snapshot.data?[index]?.arrayUnion(

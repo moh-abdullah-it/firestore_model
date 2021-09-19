@@ -14,6 +14,9 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
 
   bool isUpdating = false;
 
+  Timestamp? _createdTime;
+  Timestamp? _updatedTime;
+
   /// retrieve Your model FirestoreModel.use<Model>()
   static T use<T extends Object>() {
     if (_injectsMap.containsKey(T.toString())) {
@@ -38,8 +41,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   }
 
   _responseBuilder(Map<String, dynamic>? map) {
-    this.createdAt = map?['createdAt'];
-    this.updatedAt = map?['updatedAt'];
+    this._createdTime = map?['createdAt'];
+    this._updatedTime = map?['updatedAt'];
     return this.responseBuilder(map);
   }
 
@@ -56,6 +59,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     _model.docId = doc.id;
     _model.path = doc.reference.path;
     _model.parentPath = doc.reference.parent.path;
+    _model.createdAt = _createdTime?.toDate();
+    _model.updatedAt = _updatedTime?.toDate();
     return _model;
   }
 
@@ -78,7 +83,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// user.create(docId: 'doc_id');
   Future<void> create({String? docId}) async {
     return await _collectionReference.doc(docId).set(this).catchError((error) {
-      print("Failed to add user: $error");
+      print("Failed to add model: $error");
     });
   }
 
@@ -373,6 +378,6 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
       _model.parentPath = path ?? this.path;
       return _model;
     }
-    throw Exception("FirestoreModel ${S.toString()} Not Found");
+    throw Exception("SubCollectionModel ${S.toString()} Not Found");
   }
 }
