@@ -1,3 +1,6 @@
+## 0.8.1
+* fix `createdAt` && `updatedAt` return null.
+
 ## 0.8.0
 * modify support `subCollections` by parent model 
 * modify `builders` support `subCollections` by `parentModel`
