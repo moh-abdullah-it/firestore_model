@@ -18,16 +18,26 @@ class Profile extends StatelessWidget {
       ),
       body: ModelStreamGetBuilder<Post>(
         parentModel: user,
-        builder: (_, snapshot) {
+        onChange: () {
+          print("Data Change");
+        },
+        onLoading: () {
+          return Center(
+            child: Text("Loading"),
+          );
+        },
+        onEmpty: () => Center(
+          child: Text("Sorry Your List is Empty"),
+        ),
+        onSuccess: (posts) {
+          print("On Success");
           return ListView.builder(
-              itemCount: snapshot.data?.length,
+              itemCount: posts?.length,
               itemBuilder: (_, index) {
-                Post? post = snapshot.data?[index];
+                Post? post = posts?[index];
                 return ListTile(
                   onTap: () async {
                     post?.update(data: {'title': 'updated title'});
-                    post?.description = 'new description';
-                    post?.save();
                   },
                   title: Text("${post?.title}"),
                   subtitle: Text(post?.docId ?? ''),

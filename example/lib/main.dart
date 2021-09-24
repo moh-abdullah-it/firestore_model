@@ -108,16 +108,27 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: ModelStreamGetBuilder<User>(
-          builder: (_, snapshot) {
+          onChange: () {
+            print("Data Change");
+          },
+          onLoading: () {
+            return Center(
+              child: Text("Loading"),
+            );
+          },
+          onEmpty: () => Center(
+            child: Text("Sorry Your List is Empty"),
+          ),
+          onSuccess: (users) {
             return ListView.builder(
-                itemCount: snapshot.data?.length,
+                itemCount: users?.length,
                 itemBuilder: (_, index) {
                   return ListTile(
                     onTap: () async {
                       //User? user = snapshot.data?[index];
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => Profile(
-                          user: snapshot.data?[index],
+                          user: users?[index],
                         ),
                       ));
                       //snapshot.data?[index]?.remove(field: 'languages');
@@ -127,19 +138,18 @@ class _MyHomePageState extends State<MyHomePage> {
                         ..create();*/
                     },
                     title: Text(
-                        "${snapshot.data?[index]?.firstName} ${snapshot.data?[index]?.lastName}"),
-                    subtitle:
-                        Text(snapshot.data?[index]?.createdAt.toString() ?? ''),
+                        "${users?[index]?.firstName} ${users?[index]?.lastName}"),
+                    subtitle: Text(users?[index]?.createdAt.toString() ?? ''),
                     leading: IconButton(
                       onPressed: () {
-                        snapshot.data?[index]?.arrayUnion(
+                        users?[index]?.arrayUnion(
                             field: 'languages', elements: ['kotlin']);
                       },
                       icon: Icon(CupertinoIcons.plus_app),
                     ),
                     trailing: IconButton(
                       onPressed: () {
-                        snapshot.data?[index]?.arrayRemove(
+                        users?[index]?.arrayRemove(
                             field: 'languages', elements: ['kotlin']);
                       },
                       icon: Icon(CupertinoIcons.minus_circled),
