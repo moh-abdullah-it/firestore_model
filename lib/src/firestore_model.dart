@@ -81,10 +81,17 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// user.create();
   /// if you have [docId] for doc:
   /// user.create(docId: 'doc_id');
-  Future<void> create({String? docId}) async {
-    return await _collectionReference.doc(docId).set(this).catchError((error) {
-      print("Failed to add model: $error");
-    });
+  /// return model after create
+  Future<T> create({String? docId}) async {
+    if (docId != null) {
+      return await _collectionReference
+          .doc(docId)
+          .set(this)
+          .then((value) async => await find(docId));
+    }
+    return await _collectionReference
+        .add(this)
+        .then((doc) async => _toModel(await doc.get()));
   }
 
   /// To get document data by document id call [find] and pass [docId]
@@ -186,11 +193,13 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// make changes to your model and call [save]
   /// user.firstName = 'new firstname';
   /// user.save()
-  Future<void> save() async {
-    this.isUpdating = true;
+  Future<void> save({String? docId, SetOptions? setOptions}) async {
+    if ((docId ?? this.docId) != null) {
+      this.isUpdating = true;
+    }
     return await _collectionReference
-        .doc(this.docId)
-        .update(_dataMap())
+        .doc(docId ?? this.docId)
+        .set(_dataMap(), setOptions)
         .then((value) => this.isUpdating = false);
   }
 
