@@ -60,8 +60,8 @@ class User extends FirestoreModel<User> {
   
 }
 ```
-* we use model name as collection name in this example `User`
-* if you wont to change collection name override `collectionName` in your model
+* we plural model name and use it as collection name in this example collection name will be `users`.
+* if you wont to change collection name override `collectionName` in your model.
 ```dart
 @override
 String get collectionName => 'users';
@@ -91,12 +91,14 @@ User user = User(firstName: "Mohamed", lastName: "Abdullah 3");
 ```dart
 user.create();
 ```
+* return document as a model;
 * if you have id for doc:
 ```dart
 user.create(docId: 'hdoihvnoirejiu9345j');
 ```
 
 ## Save
+* use save to create or update model.
 * make changes to your model and call `save`:
 ```dart
 user.firstName = 'new firstname';
@@ -240,7 +242,31 @@ builder: (_, snapshot) {
 // your widget
 });
 ```
+## Builder Listener
+you can listen to any builder:
+    * `onLoading` => fire when builder is loading.
+    * `onChange` => fire when your data in stream builder changed.
+    * `onSuccess` => fire when builder return data
+    * `onError` => fire if error in query
+    * `onEmpty` => fire if builder success but data is empty
 
+```dart
+onChange: () {
+  print("Data Change");
+},
+onLoading: () {
+    return Center(
+    child: Text("Loading"),
+    );
+},
+onEmpty: () => Center(
+  child: Text("Sorry Your List is Empty"),
+),
+onSuccess: (data) {
+  //return builder widget;
+},
+onError: (error) => print("Error $error"),
+```
 ## FieldValue
 
 * `increment`: increment field value
@@ -288,7 +314,7 @@ class Post extends SubCollectionModel<Post> {
 }
 ```
 * override `toMap` && `responseBuilder`
-* we use model name as subCollection name in this example `Post`
+* we plural model name and use it as collection name in this example collection name will be `posts`.
 * if you wont to change subCollection name override `subCollectionName` in your model
 ```dart
 @override

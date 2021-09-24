@@ -1,3 +1,15 @@
+## 0.9.0
+* modify `create` method return model after create.
+* change beaver `save` method to create or update.
+* add `initialData` to `builders`:
+* add listeners to `builders`:
+    * onLoading.
+    * onChange.
+    * onSuccess.
+    * onError.
+    * onEmpty.
+* plural collection name by model name.
+
 ## 0.8.1
 * fix `createdAt` && `updatedAt` return null.
 
