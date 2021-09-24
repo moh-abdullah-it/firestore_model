@@ -19,7 +19,4 @@ class Post extends SubCollectionModel<Post> {
         'title': this.title,
         'description': this.description,
       };
-
-  @override
-  String get subCollectionName => 'posts';
 }
