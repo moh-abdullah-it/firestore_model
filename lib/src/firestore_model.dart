@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'core/model.dart';
 
@@ -54,7 +55,10 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
             toFirestore: (snapshot, _) => _dataMap());
   }
 
-  T _toModel(DocumentSnapshot doc) {
+  T? _toModel(DocumentSnapshot doc) {
+    if (!doc.exists) {
+      return null;
+    }
     T _model = doc.data() as T;
     _model.docId = doc.id;
     _model.path = doc.reference.path;
@@ -89,7 +93,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
 
   /// To get document data by document id call [find] and pass [docId]
   /// User user = await [FirestoreModel].use<User>().find('doc_id')
-  Future<T> find(String docId) async {
+  Future<T?> find(String docId) async {
     return await _collectionReference.doc(docId).get().then((doc) {
       return _toModel(doc);
     });
@@ -98,7 +102,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// To stream document data by document id call [streamFind] as pass [docId]
   /// Stream<User> streamUser = [FirestoreModel].use<User>()
   /// .streamFind('doc_id')
-  Stream<T> streamFind(String docId) {
+  Stream<T?> streamFind(String docId) {
     return _collectionReference.doc(docId).snapshots().map((doc) {
       return _toModel(doc);
     });
@@ -110,7 +114,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   ///     queryBuilder: (query) => query.where('score', isGreaterThan: 100)
   ///     .orderBy('score', descending: true)
   ///     );
-  Future<T> first({Query queryBuilder(Query query)?}) async {
+  Future<T?> first({Query queryBuilder(Query query)?}) async {
     Query _query = _collectionReference;
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
@@ -123,12 +127,16 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// To stream document data by document id call [streamFind] as pass [docId]
   /// Stream<User> streamUser = [FirestoreModel].use<User>()
   /// .streamFind('doc_id')
-  Stream<T> streamFirst({Query queryBuilder(Query query)?}) {
+  Stream<T?> streamFirst(
+      {Query queryBuilder(Query query)?, VoidCallback? onChange}) {
     Query _query = _collectionReference;
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
     }
     return _collectionReference.limit(1).snapshots().map((snapshot) {
+      if (snapshot.docChanges.isNotEmpty) {
+        if (onChange != null) onChange();
+      }
       return _toModel(snapshot.docs.first);
     });
   }
@@ -147,7 +155,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// List<User> topUsers = await [FirestoreModel].use<User>().get(
   ///     queryBuilder: (query) => query.orderBy('score', descending: true).limit(10)
   ///     );
-  Future<List<T?>> get({Query queryBuilder(Query query)?, Query? query}) async {
+  Future<List<T?>?> get(
+      {Query queryBuilder(Query query)?, Query? query}) async {
     Query _query = query ?? _collectionReference;
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
@@ -172,15 +181,23 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// Stream<List<User>> topUsers = await [FirestoreModel].use<User>().streamGet(
   ///     queryBuilder: (query) => query.orderBy('score', descending: true).limit(10)
   ///     );
-  Stream<List<T?>> streamGet({Query queryBuilder(Query query)?, Query? query}) {
+  Stream<List<T?>?> streamGet(
+      {Query queryBuilder(Query query)?,
+      Query? query,
+      VoidCallback? onChange}) {
     Query _query = _collectionReference;
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
     }
     Stream<QuerySnapshot> snapshot = _query.snapshots();
-    return snapshot.map((event) => event.docs.map<T?>((doc) {
-          return _toModel(doc);
-        }).toList());
+    return snapshot.map((event) {
+      if (event.docChanges.isNotEmpty) {
+        if (onChange != null) onChange();
+      }
+      return event.docs.map<T?>((doc) {
+        return _toModel(doc);
+      }).toList();
+    });
   }
 
   /// make changes to your model and call [save]
@@ -346,7 +363,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     return await this.update(docId: docId, data: {field: FieldValue.delete()});
   }
 
-  Future<List<T?>> getSubCollection(
+  Future<List<T?>?> getSubCollection(
     String subCollection, {
     String? docId,
     Query queryBuilder(Query query)?,
@@ -359,7 +376,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     return await this.get(query: _query);
   }
 
-  Stream<List<T?>> streamSubCollection(
+  Stream<List<T?>?> streamSubCollection(
     String subCollection, {
     String? docId,
     Query queryBuilder(Query query)?,
