@@ -86,7 +86,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// if you have [docId] for doc:
   /// user.create(docId: 'doc_id');
   /// return model after create
-  Future<T> create({String? docId}) async {
+  Future<T?> create({String? docId}) async {
     if (docId != null) {
       return await _collectionReference
           .doc(docId)
