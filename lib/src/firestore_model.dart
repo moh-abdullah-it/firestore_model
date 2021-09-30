@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'core/model.dart';
 
@@ -135,14 +134,14 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// Stream<User> streamUser = [FirestoreModel].use<User>()
   /// .streamFind('doc_id')
   Stream<T?> streamFirst(
-      {Query queryBuilder(Query query)?, VoidCallback? onChange}) {
+      {Query queryBuilder(Query query)?, Function(T? dataChange)? onChange}) {
     Query _query = _collectionReference;
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
     }
     return _collectionReference.limit(1).snapshots().map((snapshot) {
       if (snapshot.docChanges.isNotEmpty) {
-        if (onChange != null) onChange();
+        if (onChange != null) onChange(_toModel(snapshot.docChanges.first.doc));
       }
       return _toModel(snapshot.docs.first);
     });
@@ -191,7 +190,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   Stream<List<T?>?> streamGet(
       {Query queryBuilder(Query query)?,
       Query? query,
-      VoidCallback? onChange}) {
+      Function(List<T?> chnagesData)? onChange}) {
     Query _query = _collectionReference;
     if (queryBuilder != null) {
       _query = queryBuilder(_query);
@@ -199,7 +198,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     Stream<QuerySnapshot> snapshot = _query.snapshots();
     return snapshot.map((event) {
       if (event.docChanges.isNotEmpty) {
-        if (onChange != null) onChange();
+        if (onChange != null)
+          onChange(event.docChanges.map((e) => _toModel(e.doc)).toList());
       }
       return event.docs.map<T?>((doc) {
         return _toModel(doc);

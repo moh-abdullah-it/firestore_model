@@ -41,7 +41,7 @@ class ModelStreamGetBuilder<M extends FirestoreModel<M>>
 
   final types.EmptyWidget? onEmpty;
 
-  final VoidCallback? onChange;
+  final Function(List<M?> dataChanges)? onChange;
 
   final types.ErrorWidget? onError;
 

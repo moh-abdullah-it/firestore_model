@@ -44,7 +44,7 @@ class ModelStreamSingleBuilder<M extends FirestoreModel<M>>
 
   final types.EmptyWidget? onEmpty;
 
-  final VoidCallback? onChange;
+  final Function(M? dataChnage)? onChange;
 
   final types.ErrorWidget? onError;
 
@@ -61,7 +61,7 @@ class ModelStreamSingleBuilder<M extends FirestoreModel<M>>
             : (parentModel != null
                     ? parentModel?.subCollection<M>()
                     : FirestoreModel.use<M>())
-                ?.streamFirst(queryBuilder: query),
+                ?.streamFirst(queryBuilder: query, onChange: onChange),
         initialData: initialData,
         builder: builder ??
             (context, snapshot) {
