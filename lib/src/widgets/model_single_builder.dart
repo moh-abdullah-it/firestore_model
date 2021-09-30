@@ -63,9 +63,7 @@ class ModelSingleBuilder<M extends FirestoreModel<M>> extends StatelessWidget {
             (context, snapshot) {
               assert(onSuccess != null, "onSuccess can't be null");
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return onLoading != null
-                    ? onLoading!()
-                    : Center(child: CircularProgressIndicator());
+                return onLoading != null ? onLoading!() : SizedBox();
               }
               if (snapshot.hasError) {
                 print("Error ${snapshot.error}");
