@@ -140,7 +140,8 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
       _query = queryBuilder(_query);
     }
     return _collectionReference.limit(1).snapshots().map((snapshot) {
-      if (snapshot.docChanges.isNotEmpty) {
+      if (snapshot.docChanges.isNotEmpty &&
+          !snapshot.metadata.hasPendingWrites) {
         if (onChange != null) onChange(_toModel(snapshot.docChanges.first.doc));
       }
       return _toModel(snapshot.docs.first);
@@ -197,7 +198,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     }
     Stream<QuerySnapshot> snapshot = _query.snapshots();
     return snapshot.map((event) {
-      if (event.docChanges.isNotEmpty) {
+      if (event.docChanges.isNotEmpty && !event.metadata.hasPendingWrites) {
         if (onChange != null)
           onChange(event.docChanges.map((e) => _toModel(e.doc)).toList());
       }
