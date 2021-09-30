@@ -242,12 +242,48 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
         .then((value) => this.isUpdating = false);
   }
 
+  Future<void> bulkUpdate({
+    List<String>? docsIds,
+    required Map<String, Object?> data,
+    Query query(Query query)?,
+  }) async {
+    if (query != null) {
+      return (await this.get(queryBuilder: query))?.forEach((model) {
+        this.update(docId: model?.docId, data: data);
+      });
+    }
+    if (docsIds != null) {
+      return docsIds.forEach((docId) {
+        this.update(docId: docId, data: data);
+      });
+    }
+  }
+
   /// delete current model call [delete]
   /// user.delete();
   /// delete specific model use delete by pass docId:
   /// [FirestoreModel].use<User>().delete(docId: 'doc_id')
   Future<void> delete({String? docId}) async {
     return await _collectionReference.doc(docId ?? this.docId).delete();
+  }
+
+  /// delete more one document model call [bulkDelete]
+  /// delete specific models use [bulkDelete] by pass [docsIds]
+  /// [FirestoreModel].use<User>().bulkDelete(docsIds: ['doc_id', 'doc_id_2'])
+  Future<void> bulkDelete({
+    List<String>? docsIds,
+    Query query(Query query)?,
+  }) async {
+    if (query != null) {
+      return (await this.get(queryBuilder: query))?.forEach((model) {
+        this.delete(docId: model?.docId);
+      });
+    }
+    if (docsIds != null) {
+      return docsIds.forEach((docId) {
+        this.delete(docId: docId);
+      });
+    }
   }
 
   Query _handlePaginateQuery({int? perPage, Query queryBuilder(Query query)?}) {
