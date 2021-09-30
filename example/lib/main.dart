@@ -108,8 +108,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: ModelStreamGetBuilder<User>(
-          onChange: () {
-            print("Data Change");
+          onChange: (changes) {
+            print("Data Change ${changes.length}");
           },
           onLoading: () {
             return Center(

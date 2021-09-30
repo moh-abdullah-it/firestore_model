@@ -18,8 +18,8 @@ class Profile extends StatelessWidget {
       ),
       body: ModelStreamGetBuilder<Post>(
         parentModel: user,
-        onChange: () {
-          print("Data Change");
+        onChange: (changes) {
+          print("Data Change ${changes.length}");
         },
         onLoading: () {
           return Center(
