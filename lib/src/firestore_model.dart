@@ -248,14 +248,20 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     Query query(Query query)?,
   }) async {
     if (query != null) {
-      return (await this.get(queryBuilder: query))?.forEach((model) {
-        this.update(docId: model?.docId, data: data);
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      return this.get(queryBuilder: query).then((models) {
+        models?.forEach((model) {
+          batch.update(_collectionReference.doc(model?.docId), data);
+        });
+        batch.commit();
       });
     }
     if (docsIds != null) {
-      return docsIds.forEach((docId) {
-        this.update(docId: docId, data: data);
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      docsIds.forEach((docId) {
+        batch.update(_collectionReference.doc(docId), data);
       });
+      batch.commit();
     }
   }
 
@@ -275,14 +281,20 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     Query query(Query query)?,
   }) async {
     if (query != null) {
-      return (await this.get(queryBuilder: query))?.forEach((model) {
-        this.delete(docId: model?.docId);
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      return this.get(queryBuilder: query).then((models) {
+        models?.forEach((model) {
+          batch.delete(_collectionReference.doc(model?.docId));
+        });
+        batch.commit();
       });
     }
     if (docsIds != null) {
-      return docsIds.forEach((docId) {
-        this.delete(docId: docId);
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      docsIds.forEach((docId) {
+        batch.delete(_collectionReference.doc(docId));
       });
+      batch.commit();
     }
   }
 
