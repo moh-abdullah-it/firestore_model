@@ -107,10 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: ModelStreamGetBuilder<User>(
-          onChange: (changes) {
-            print("Data Change ${changes.length}");
-          },
+        child: ModelGetRefreshBuilder<User>(
           onLoading: () {
             return Center(
               child: Text("Loading"),

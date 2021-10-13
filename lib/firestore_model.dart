@@ -10,7 +10,9 @@ export 'src/core/settings.dart';
 export 'src/firestore_model.dart';
 export 'src/sub_collection_model.dart';
 export 'src/widgets/model_get_builder.dart';
+export 'src/widgets/model_get_refresh_builder.dart';
 export 'src/widgets/model_single_builder.dart';
+export 'src/widgets/model_single_refresh_builder.dart';
 export 'src/widgets/model_stream_get_builder.dart';
 export 'src/widgets/model_stream_single_builder.dart';
 
