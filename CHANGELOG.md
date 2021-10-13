@@ -1,3 +1,8 @@
+## 0.9.5
+- modify `bulkUpdate` && `bulkDelete`
+- modify batch to `bulkUpdate` && `bulkDelete`
+- modify `ModelGetRefreshBuilder` && `ModelSingleRefreshBuilder`
+
 ## 0.9.0
 * modify `create` method return model after create.
 * change beaver `save` method to create or update.
