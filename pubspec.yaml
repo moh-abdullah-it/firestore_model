@@ -1,6 +1,6 @@
 name: firestore_model
 description: Firestore Model easy to use firestore collections by model data
-version: 0.9.5
+version: 0.9.7
 homepage: https://github.com/moh-abdullah-it/firestore_model
 
 environment:
@@ -10,12 +10,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^1.6.0
-  cloud_firestore: ^2.5.2
+  firebase_core: ^1.10.6
+  cloud_firestore: ^3.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+false_secrets:
+  - example/android/app/google-services.json
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

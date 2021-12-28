@@ -1,3 +1,7 @@
+## 0.9.7
+- upgrade dependencies
+- fix `pagination` load more: `not work`
+
 ## 0.9.5
 - modify `bulkUpdate` && `bulkDelete`
 - modify batch to `bulkUpdate` && `bulkDelete`

@@ -76,10 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void loadMore() {
-    FirestoreModel.use<User>().paginate().then((values) {
-      setState(() {
-        users.addAll(values);
-      });
+    FirestoreModel.use<User>().paginate(perPage: 1).then((values) {
+      print(values.first?.docId);
     });
   }
 

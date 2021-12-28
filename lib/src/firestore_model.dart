@@ -323,8 +323,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     QuerySnapshot snapshot =
         await _handlePaginateQuery(perPage: perPage, queryBuilder: queryBuilder)
             .get();
-    if (snapshot.docs.length > 0 &&
-        snapshot.docs.last is QueryDocumentSnapshot<T>) {
+    if (snapshot.docs.length > 0) {
       _pagination[this.collectionName] = snapshot.docs.last;
     } else {
       print("End of documents in collection ${this.collectionName}");
