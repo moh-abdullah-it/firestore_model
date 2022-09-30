@@ -1,3 +1,5 @@
+import 'package:firestore_model/firestore_model.dart';
+
 import '../utils/plural_converter.dart';
 
 typedef ResponseBuilder<T> = T Function(dynamic);
@@ -35,5 +37,9 @@ mixin Model<T> {
   String get collectionName {
     String className = this.runtimeType.toString();
     return PluralConverter().convert(className.toLowerCase());
+  }
+
+  static T instance<T extends Object>() {
+    return FirestoreModel.use<T>();
   }
 }
