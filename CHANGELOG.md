@@ -1,3 +1,6 @@
+## 0.9.8
+- upgrade dependencies
+
 ## 0.9.7
 - upgrade dependencies
 - fix `pagination` load more: `not work`
