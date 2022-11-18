@@ -18,9 +18,10 @@ export 'src/widgets/model_stream_single_builder.dart';
 
 class FirebaseApp {
   // Wait for Firebase to initialize
-  static initializeApp({FirestoreModelSettings? settings}) async {
+  static initializeApp(
+      {FirestoreModelSettings? settings, FirebaseOptions? options}) async {
     WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(options: options);
     FirebaseFirestore.instance.settings = Settings(
       persistenceEnabled: settings?.persistenceEnabled,
       cacheSizeBytes: settings?.cacheSizeBytes,
