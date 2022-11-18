@@ -19,6 +19,8 @@ dev_dependencies:
 
 false_secrets:
   - example/android/app/google-services.json
+  - example/ios/Runner/GoogleServices-Info.plist
+  - example/macos/Runner/GoogleService-Info.plist
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

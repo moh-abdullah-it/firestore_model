@@ -5,8 +5,11 @@ import 'package:firestore_model/firestore_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'firebase_options.dart';
+
 void main() async {
   await FirebaseApp.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
       settings: FirestoreModelSettings(
           //persistenceEnabled: true,
           ));

@@ -30,7 +30,7 @@ mixin Model<T> {
   /// model mapping to write in collection
   Map<String, dynamic> get toMap;
 
-  /// model mapping to write in collection
+  /// model mapping to read  collection
   ResponseBuilder<T> get responseBuilder;
 
   /// collection name [FirestoreModel] use your [Model] name
