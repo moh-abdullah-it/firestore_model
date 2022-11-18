@@ -1,3 +1,6 @@
+## 0.9.10
+- modify Firebase Options to initialize the Firebase app
+
 ## 0.9.9
 - upgrade dependencies
 
