@@ -1,4 +1,4 @@
-final Map<String, String> regularPluralNouns = const {
+const Map<String, String> regularPluralNouns = {
   "addendum": "addenda",
   "aircraft": "aircraft",
   "alumna": "alumnae",

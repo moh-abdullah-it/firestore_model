@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firestore_model/firestore_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,18 +21,18 @@ class Profile extends StatelessWidget {
       body: ModelStreamGetBuilder<Post>(
         parentModel: user,
         onChange: (changes) {
-          print("Data Change ${changes.length}");
+          log("Data Change ${changes.length}");
         },
         onLoading: () {
-          return Center(
+          return const Center(
             child: Text("Loading"),
           );
         },
-        onEmpty: () => Center(
+        onEmpty: () => const Center(
           child: Text("Sorry Your List is Empty"),
         ),
         onSuccess: (posts) {
-          print("On Success");
+          log("On Success");
           return ListView.builder(
               itemCount: posts?.length,
               itemBuilder: (_, index) {
@@ -46,7 +48,7 @@ class Profile extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(CupertinoIcons.plus_app),
+        child: const Icon(CupertinoIcons.plus_app),
         onPressed: () {
           Post? post = user?.subCollection<Post>();
           post?.title = "new test Title For post ${DateTime.now()}";

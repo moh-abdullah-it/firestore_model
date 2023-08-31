@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -63,16 +65,18 @@ class ModelSingleBuilder<M extends FirestoreModel<M>> extends StatelessWidget {
             (context, snapshot) {
               assert(onSuccess != null, "onSuccess can't be null");
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return onLoading != null ? onLoading!() : SizedBox();
+                return onLoading != null ? onLoading!() : const SizedBox();
               }
               if (snapshot.hasError) {
-                print("Error ${snapshot.error}");
-                return onError != null ? onError!(snapshot.error) : SizedBox();
+                log("Error ${snapshot.error}");
+                return onError != null
+                    ? onError!(snapshot.error)
+                    : const SizedBox();
               }
               if (snapshot.hasData && snapshot.data != null) {
                 return onSuccess!(snapshot.data);
               }
-              return onEmpty != null ? onEmpty!() : SizedBox();
+              return onEmpty != null ? onEmpty!() : const SizedBox();
             });
   }
 }

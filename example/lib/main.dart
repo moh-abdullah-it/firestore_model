@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:example/models/post.dart';
 import 'package:example/models/user.dart';
 import 'package:example/profile.dart';
@@ -10,14 +12,16 @@ import 'firebase_options.dart';
 void main() async {
   await FirebaseApp.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
-      settings: FirestoreModelSettings(
+      settings: const FirestoreModelSettings(
           //persistenceEnabled: true,
           ));
   FirestoreModel.injectAll([User(), Post()]);
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -35,35 +39,26 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  User _user = User(
+  final User _user = User(
     firstName: "mohamed 3",
     lastName: "Abdullah 3",
     languages: ['php', 'dart', 'swift'],
   );
+
   List<User?> users = <User?>[];
 
   @override
@@ -80,13 +75,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void loadMore() {
     FirestoreModel.use<User>().paginate(perPage: 1).then((values) {
-      print(values.first?.docId);
+      log(values.first?.docId ?? '');
     });
   }
 
   void checkDoc() async {
-    print(
-        "doc exists ${await FirestoreModel.use<User>().exists("4P1LfnSycMEDaTP5yvEF")}");
+    log("doc exists ${await FirestoreModel.use<User>().exists("4P1LfnSycMEDaTP5yvEF")}");
   }
 
   void _addUser() async {
@@ -108,13 +102,14 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: ModelGetRefreshBuilder<User>(
+        child: ModelStreamGetBuilder<User>(
+          query: (q) => q.orderBy('createdAt', descending: true),
           onLoading: () {
-            return Center(
+            return const Center(
               child: Text("Loading"),
             );
           },
-          onEmpty: () => Center(
+          onEmpty: () => const Center(
             child: Text("Sorry Your List is Empty"),
           ),
           onSuccess: (users) {
@@ -137,20 +132,26 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     title: Text(
                         "${users?[index]?.firstName} ${users?[index]?.lastName}"),
-                    subtitle: Text(users?[index]?.createdAt.toString() ?? ''),
+                    subtitle: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(users?[index]?.createdAt.toString() ?? ''),
+                        Text(users?[index]?.languages.toString() ?? ''),
+                      ],
+                    ),
                     leading: IconButton(
                       onPressed: () {
                         users?[index]?.arrayUnion(
                             field: 'languages', elements: ['kotlin']);
                       },
-                      icon: Icon(CupertinoIcons.plus_app),
+                      icon: const Icon(CupertinoIcons.plus_app),
                     ),
                     trailing: IconButton(
                       onPressed: () {
-                        users?[index]?.arrayRemove(
-                            field: 'languages', elements: ['kotlin']);
+                        users?[index]?.delete();
                       },
-                      icon: Icon(CupertinoIcons.minus_circled),
+                      icon: const Icon(CupertinoIcons.minus_circled),
                     ),
                   );
                 });
@@ -205,7 +206,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addUser(),
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

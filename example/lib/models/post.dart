@@ -7,8 +7,8 @@ class Post extends SubCollectionModel<Post> {
   Post({this.title, this.description});
 
   Post.fromMap(Map<String, dynamic> map) {
-    this.title = map['title'];
-    this.description = map['description'];
+    title = map['title'];
+    description = map['description'];
   }
 
   @override
@@ -16,7 +16,7 @@ class Post extends SubCollectionModel<Post> {
 
   @override
   Map<String, dynamic> get toMap => {
-        'title': this.title,
-        'description': this.description,
+        'title': title,
+        'description': description,
       };
 }

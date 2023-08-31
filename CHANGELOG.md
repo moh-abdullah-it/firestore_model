@@ -1,3 +1,7 @@
+## 1.0.0-beta-1
+* release first beta
+* upgrade flutter and dart code
+
 ## 0.9.10
 - modify Firebase Options to initialize the Firebase app
 

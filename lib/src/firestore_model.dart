@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -35,48 +36,46 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
 
   /// Inject All Your models
   static void injectAll(List<Object> list) {
-    list.forEach((t) {
+    for (var t in list) {
       inject(t);
-    });
+    }
   }
 
   _responseBuilder(Map<String, dynamic>? map) {
     this._createdTime = map?['createdAt'];
     this._updatedTime = map?['updatedAt'];
-    return this.responseBuilder(map);
+    return responseBuilder(map);
   }
 
   _initReference() {
-    return FirebaseFirestore.instance
-        .collection(this.collectionName)
-        .withConverter(
-            fromFirestore: (snapshot, _) => _responseBuilder(snapshot.data()),
-            toFirestore: (snapshot, _) => _dataMap());
+    return FirebaseFirestore.instance.collection(collectionName).withConverter(
+        fromFirestore: (snapshot, _) => _responseBuilder(snapshot.data()),
+        toFirestore: (snapshot, _) => _dataMap());
   }
 
   T? _toModel(DocumentSnapshot doc) {
     if (!doc.exists) {
       return null;
     }
-    T _model = doc.data() as T;
-    _model.docId = doc.id;
-    _model.path = doc.reference.path;
-    _model.parentPath = doc.reference.parent.path;
-    _model.createdAt = _createdTime?.toDate();
-    _model.updatedAt = _updatedTime?.toDate();
-    return _model;
+    T model = doc.data() as T;
+    model.docId = doc.id;
+    model.path = doc.reference.path;
+    model.parentPath = doc.reference.parent.path;
+    model.createdAt = _createdTime?.toDate();
+    model.updatedAt = _updatedTime?.toDate();
+    return model;
   }
 
   Map<String, dynamic> _dataMap({Map<String, dynamic>? map}) {
-    Map<String, dynamic> _data = <String, dynamic>{};
-    _data.addAll(map ?? this.toMap);
-    if (this.withTimestamps) {
-      _data.addAll({
-        '${this.isUpdating ? 'updatedAt' : 'createdAt'}':
+    Map<String, dynamic> data = <String, dynamic>{};
+    data.addAll(map ?? toMap);
+    if (withTimestamps) {
+      data.addAll({
+        this.isUpdating ? 'updatedAt' : 'createdAt':
             FieldValue.serverTimestamp(),
       });
     }
-    return _data;
+    return data;
   }
 
   /// To Write in firestore database
@@ -120,12 +119,12 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   ///     queryBuilder: (query) => query.where('score', isGreaterThan: 100)
   ///     .orderBy('score', descending: true)
   ///     );
-  Future<T?> first({Query queryBuilder(Query query)?}) async {
-    Query _query = _collectionReference;
+  Future<T?> first({Query Function(Query query)? queryBuilder}) async {
+    Query query = _collectionReference;
     if (queryBuilder != null) {
-      _query = queryBuilder(_query);
+      query = queryBuilder(query);
     }
-    return await _query.limit(1).get().then((snapshot) {
+    return await query.limit(1).get().then((snapshot) {
       return _toModel(snapshot.docs.first);
     });
   }
@@ -134,10 +133,11 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// Stream<User> streamUser = [FirestoreModel].use<User>()
   /// .streamFind('doc_id')
   Stream<T?> streamFirst(
-      {Query queryBuilder(Query query)?, Function(T? dataChange)? onChange}) {
-    Query _query = _collectionReference;
+      {Query Function(Query query)? queryBuilder,
+      Function(T? dataChange)? onChange}) {
+    Query query = _collectionReference;
     if (queryBuilder != null) {
-      _query = queryBuilder(_query);
+      query = queryBuilder(query);
     }
     return _collectionReference.limit(1).snapshots().map((snapshot) {
       if (snapshot.docChanges.isNotEmpty &&
@@ -163,12 +163,12 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   ///     queryBuilder: (query) => query.orderBy('score', descending: true).limit(10)
   ///     );
   Future<List<T?>?> get(
-      {Query queryBuilder(Query query)?, Query? query}) async {
-    Query _query = query ?? _collectionReference;
+      {Query Function(Query query)? queryBuilder, Query? query}) async {
+    Query query0 = query ?? _collectionReference;
     if (queryBuilder != null) {
-      _query = queryBuilder(_query);
+      query0 = queryBuilder(query0);
     }
-    QuerySnapshot snapshot = await _query.get();
+    QuerySnapshot snapshot = await query0.get();
     return snapshot.docs.map<T?>((doc) {
       return _toModel(doc);
     }).toList();
@@ -189,18 +189,19 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   ///     queryBuilder: (query) => query.orderBy('score', descending: true).limit(10)
   ///     );
   Stream<List<T?>?> streamGet(
-      {Query queryBuilder(Query query)?,
+      {Query Function(Query query)? queryBuilder,
       Query? query,
       Function(List<T?> chnagesData)? onChange}) {
-    Query _query = _collectionReference;
+    Query query0 = _collectionReference;
     if (queryBuilder != null) {
-      _query = queryBuilder(_query);
+      query0 = queryBuilder(query0);
     }
-    Stream<QuerySnapshot> snapshot = _query.snapshots();
+    Stream<QuerySnapshot> snapshot = query0.snapshots();
     return snapshot.map((event) {
       if (event.docChanges.isNotEmpty && !event.metadata.hasPendingWrites) {
-        if (onChange != null)
+        if (onChange != null) {
           onChange(event.docChanges.map((e) => _toModel(e.doc)).toList());
+        }
       }
       return event.docs.map<T?>((doc) {
         return _toModel(doc);
@@ -245,7 +246,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   Future<void> bulkUpdate({
     List<String>? docsIds,
     required Map<String, Object?> data,
-    Query query(Query query)?,
+    Query Function(Query query)? query,
   }) async {
     if (query != null) {
       WriteBatch batch = FirebaseFirestore.instance.batch();
@@ -258,9 +259,9 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     }
     if (docsIds != null) {
       WriteBatch batch = FirebaseFirestore.instance.batch();
-      docsIds.forEach((docId) {
+      for (var docId in docsIds) {
         batch.update(_collectionReference.doc(docId), data);
-      });
+      }
       batch.commit();
     }
   }
@@ -278,7 +279,7 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   /// [FirestoreModel].use<User>().bulkDelete(docsIds: ['doc_id', 'doc_id_2'])
   Future<void> bulkDelete({
     List<String>? docsIds,
-    Query query(Query query)?,
+    Query Function(Query query)? query,
   }) async {
     if (query != null) {
       WriteBatch batch = FirebaseFirestore.instance.batch();
@@ -291,24 +292,25 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
     }
     if (docsIds != null) {
       WriteBatch batch = FirebaseFirestore.instance.batch();
-      docsIds.forEach((docId) {
+      for (var docId in docsIds) {
         batch.delete(_collectionReference.doc(docId));
-      });
+      }
       batch.commit();
     }
   }
 
-  Query _handlePaginateQuery({int? perPage, Query queryBuilder(Query query)?}) {
-    Query _query = _collectionReference;
+  Query _handlePaginateQuery(
+      {int? perPage, Query Function(Query query)? queryBuilder}) {
+    Query query = _collectionReference;
     if (queryBuilder != null) {
-      _query = queryBuilder(_query);
+      query = queryBuilder(query);
     }
-    DocumentSnapshot? lastDocument = _pagination[this.collectionName];
+    DocumentSnapshot? lastDocument = _pagination[collectionName];
     if (lastDocument != null) {
-      _query = _query.startAfterDocument(lastDocument);
+      query = query.startAfterDocument(lastDocument);
     }
-    _query = _query.limit(perPage ?? this.perPage);
-    return _query;
+    query = query.limit(perPage ?? this.perPage);
+    return query;
   }
 
   /// To get results limit and load more as pagination from your collection call [paginate]
@@ -319,14 +321,14 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   ///     queryBuilder: (query) => query.orderBy('score', descending: true),
   ///     );
   Future<List<T?>> paginate(
-      {int? perPage, Query queryBuilder(Query query)?}) async {
+      {int? perPage, Query Function(Query query)? queryBuilder}) async {
     QuerySnapshot snapshot =
         await _handlePaginateQuery(perPage: perPage, queryBuilder: queryBuilder)
             .get();
-    if (snapshot.docs.length > 0) {
-      _pagination[this.collectionName] = snapshot.docs.last;
+    if (snapshot.docs.isNotEmpty) {
+      _pagination[collectionName] = snapshot.docs.last;
     } else {
-      print("End of documents in collection ${this.collectionName}");
+      log("End of documents in collection $collectionName");
     }
     return snapshot.docs.map<T?>((doc) {
       return _toModel(doc);
@@ -339,16 +341,16 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   ///     queryBuilder: (query) => query.orderBy('score', descending: true),
   ///     );
   Stream<List<T?>> streamPaginate(
-      {int? perPage, Query queryBuilder(Query query)?}) {
+      {int? perPage, Query Function(Query query)? queryBuilder}) {
     Stream<QuerySnapshot> snapshot =
         _handlePaginateQuery(perPage: perPage, queryBuilder: queryBuilder)
             .snapshots();
     return snapshot.map((event) {
-      if (event.docs.length > 0 &&
+      if (event.docs.isNotEmpty &&
           event.docs.last is QueryDocumentSnapshot<T>) {
-        _pagination[this.collectionName] = event.docs.last;
+        _pagination[collectionName] = event.docs.last;
       } else {
-        print("End of documents in collection ${this.collectionName}");
+        log("End of documents in collection $collectionName");
       }
       return event.docs.map<T?>((doc) {
         return _toModel(doc);
@@ -423,34 +425,34 @@ abstract class FirestoreModel<T extends Model> with Model<T> {
   Future<List<T?>?> getSubCollection(
     String subCollection, {
     String? docId,
-    Query queryBuilder(Query query)?,
+    Query Function(Query query)? queryBuilder,
   }) async {
-    Query? _query =
+    Query? query =
         _collectionReference.doc(docId ?? this.docId).collection(subCollection);
     if (queryBuilder != null) {
-      _query = queryBuilder(_query);
+      query = queryBuilder(query);
     }
-    return await this.get(query: _query);
+    return await this.get(query: query);
   }
 
   Stream<List<T?>?> streamSubCollection(
     String subCollection, {
     String? docId,
-    Query queryBuilder(Query query)?,
+    Query Function(Query query)? queryBuilder,
   }) {
-    Query? _query =
+    Query? query =
         _collectionReference.doc(docId ?? this.docId).collection(subCollection);
     if (queryBuilder != null) {
-      _query = queryBuilder(_query);
+      query = queryBuilder(query);
     }
-    return this.streamGet(query: _query);
+    return this.streamGet(query: query);
   }
 
   S subCollection<S extends Model>({String? path}) {
     if (_injectsMap.containsKey(S.toString())) {
-      S _model = _injectsMap[S.toString()] as S;
-      _model.parentPath = path ?? this.path;
-      return _model;
+      S model = _injectsMap[S.toString()] as S;
+      model.parentPath = path ?? this.path;
+      return model;
     }
     throw Exception("SubCollectionModel ${S.toString()} Not Found");
   }

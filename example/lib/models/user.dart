@@ -12,19 +12,15 @@ class User extends FirestoreModel<User> {
 
   // use to read
   User.formMap(Map<String, dynamic> map) {
-    this.firstName = map['first_name'];
-    this.lastName = map['last_name'];
-    this.languages =
-        map['languages'] is List ? map['languages'].cast<String>() : [];
+    firstName = map['first_name'];
+    lastName = map['last_name'];
+    languages = map['languages'] is List ? map['languages'].cast<String>() : [];
   }
 
   // use to write
   @override
-  Map<String, dynamic> get toMap => {
-        'first_name': this.firstName,
-        'last_name': this.lastName,
-        'languages': this.languages
-      };
+  Map<String, dynamic> get toMap =>
+      {'first_name': firstName, 'last_name': lastName, 'languages': languages};
 
   @override
   ResponseBuilder<User> get responseBuilder => (map) => User.formMap(map);

@@ -4,7 +4,7 @@ import 'utils/plural_converter.dart';
 
 abstract class SubCollectionModel<T extends Model> extends FirestoreModel<T> {
   String get subCollectionName {
-    String className = this.runtimeType.toString();
+    String className = runtimeType.toString();
     return PluralConverter().convert(className.toLowerCase());
   }
 

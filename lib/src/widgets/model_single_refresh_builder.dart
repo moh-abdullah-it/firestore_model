@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -100,15 +102,15 @@ class _ModelSingleRefreshBuilderState<M extends FirestoreModel<M>>
 
   _buildWidget() {
     if (isLoading) {
-      return widget.onLoading != null ? widget.onLoading!() : SizedBox();
+      return widget.onLoading != null ? widget.onLoading!() : const SizedBox();
     }
     if (hasError) {
-      print("Error $error");
-      return widget.onError != null ? widget.onError!(error) : SizedBox();
+      log("Error $error");
+      return widget.onError != null ? widget.onError!(error) : const SizedBox();
     }
     if (model != null) {
       return widget.onSuccess!(model);
     }
-    return widget.onEmpty != null ? widget.onEmpty!() : SizedBox();
+    return widget.onEmpty != null ? widget.onEmpty!() : const SizedBox();
   }
 }

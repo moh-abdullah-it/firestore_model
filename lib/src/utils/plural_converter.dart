@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'regular_plural_nouns.dart';
 
-typedef String MatchToString(Match m);
+typedef MatchToString = String Function(Match m);
 
 /// Uncountable nouns are substances, concepts etc that we cannot divide into
 /// separate elements. We cannot "count" them.
-final Set<String> uncountableNouns = new Set.from(const [
+final Set<String> uncountableNouns = {
   "equipment",
   "information",
   "rice",
@@ -17,7 +17,7 @@ final Set<String> uncountableNouns = new Set.from(const [
   "sheep",
   "jeans",
   "police"
-]);
+};
 
 class PluralConverter extends Converter {
   final List<List> _inflectionRules = [];
@@ -27,7 +27,7 @@ class PluralConverter extends Converter {
       addIrregularInflectionRule(singular, plural);
     });
 
-    [
+    for (var rule in [
       [r'$', (Match m) => 's'],
       [r's$', (Match m) => 's'],
       [r'^(ax|test)is$', (Match m) => '${m[1]}es'],
@@ -48,12 +48,13 @@ class PluralConverter extends Converter {
       [r'^(ox)$', (Match m) => '${m[1]}en'],
       [r'^(oxen)$', (Match m) => m[1]!],
       [r'(quiz)$', (Match m) => '${m[1]}zes']
-    ].reversed.forEach((rule) =>
-        addInflectionRule(rule.first as String, rule.last as MatchToString));
+    ].reversed) {
+      addInflectionRule(rule.first as String, rule.last as MatchToString);
+    }
   }
 
   void addInflectionRule(String singular, MatchToString plural) {
-    _inflectionRules.add([new RegExp(singular, caseSensitive: false), plural]);
+    _inflectionRules.add([RegExp(singular, caseSensitive: false), plural]);
   }
 
   void addIrregularInflectionRule(String singular, String plural) {
@@ -78,20 +79,20 @@ class PluralConverter extends Converter {
   }
 
   @override
-  convert(word) {
-    if (!word.isEmpty) {
-      if (uncountableNouns.contains(word.toLowerCase())) {
-        return word;
+  convert(input) {
+    if (!input.isEmpty) {
+      if (uncountableNouns.contains(input.toLowerCase())) {
+        return input;
       } else {
         for (var r in _inflectionRules) {
           var pattern = r.first;
-          if (pattern.hasMatch(word)) {
-            return word.replaceAllMapped(pattern, r.last as MatchToString);
+          if (pattern.hasMatch(input)) {
+            return input.replaceAllMapped(pattern, r.last as MatchToString);
           }
         }
       }
     }
 
-    return word;
+    return input;
   }
 }

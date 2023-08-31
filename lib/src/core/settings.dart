@@ -10,7 +10,7 @@ class FirestoreModelSettings {
   /// Constant used to indicate the LRU garbage collection should be disabled.
   ///
   /// Set this value as the cacheSizeBytes on the settings passed to the Firestore instance.
-  static const int CACHE_SIZE_UNLIMITED = -1;
+  static const int cacheSizeUnlimited = -1;
 
   /// Attempts to enable persistent storage, if possible.
   /// This setting has no effect on Web, for Web use [FirebaseFirestore.enablePersistence] instead.

@@ -35,7 +35,7 @@ mixin Model<T> {
 
   /// collection name [FirestoreModel] use your [Model] name
   String get collectionName {
-    String className = this.runtimeType.toString();
+    String className = runtimeType.toString();
     return PluralConverter().convert(className.toLowerCase());
   }
 
